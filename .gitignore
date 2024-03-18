@@ -1,0 +1,7 @@
+/build
+/dist
+/node_modules
+*.log
+test/snapshot
+linux.bin
+rootfs.ext2
