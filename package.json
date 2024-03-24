@@ -1,0 +1,41 @@
+{
+    "name": "@tuler/cartesi-machine",
+    "version": "0.0.1",
+    "description": "Cartesi Machine Node.js bindings",
+    "main": "dist/binding.js",
+    "scripts": {
+        "build": "run-s compile bundle",
+        "bundle": "tsup",
+        "clean": "node-gyp clean",
+        "compile": "node-gyp build",
+        "configure": "node-gyp configure",
+        "install": "node-gyp-build",
+        "test": "vitest"
+    },
+    "gypfile": true,
+    "keywords": [
+        "cartesi",
+        "bindings",
+        "node.js"
+    ],
+    "author": "Danilo Tuler",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "bindings": "^1.5.0",
+        "node-addon-api": "^8.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.30",
+        "js-convert-case": "^4.2.0",
+        "node-gyp": "^10.1.0",
+        "node-gyp-build": "^4.8.0",
+        "npm-run-all": "^4.1.5",
+        "prebuildify": "^6.0.0",
+        "prettier": "^3.2.5",
+        "tsup": "^8.0.2",
+        "tsx": "^4.7.1",
+        "typescript": "^5.4.3",
+        "vitest": "^1.4.0"
+    },
+    "packageManager": "pnpm@8.15.3"
+}

@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.hcl": "terraform",
+        "*.toml": "toml",
+        "*.ts": "typescript",
+        "*.sol": "solidity",
+        "ios": "cpp",
+        "charconv": "cpp",
+        "system_error": "cpp"
+    }
+}

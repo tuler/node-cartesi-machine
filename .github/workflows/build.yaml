@@ -1,0 +1,38 @@
+name: build
+on: [push]
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+    cancel-in-progress: true
+permissions:
+    contents: read
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - uses: pnpm/action-setup@v3
+
+            - name: Setup Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "pnpm"
+
+            - name: Build machine-emulator
+              working-directory: machine-emulator
+              run: |
+                  make dep
+                  make bundle-boost
+                  make -C src release=yes libcartesi.a libcartesi.so
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Build
+              run: |
+                  pnpm run configure
+                  pnpm run build
