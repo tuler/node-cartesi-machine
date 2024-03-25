@@ -22,13 +22,6 @@ jobs:
                   node-version: 20
                   cache: "pnpm"
 
-            - name: Build machine-emulator
-              working-directory: machine-emulator
-              run: |
-                  make dep
-                  make bundle-boost
-                  make -C src release=yes libcartesi.a libcartesi.so
-
             - name: Install dependencies
               run: pnpm install
 
