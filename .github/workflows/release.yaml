@@ -22,6 +22,12 @@ jobs:
                   node-version: 20
                   cache: "pnpm"
 
+            - name: Prepare Machine Emulator
+              working-directory: machine-emulator
+              run: |
+                  make dep
+                  make bundle-boost
+
             - name: Install Dependencies
               run: pnpm install
 
