@@ -10,8 +10,6 @@
             ],
             "include_dirs": [
                 "<!@(node -p \"require('node-addon-api').include_dir\")",
-                "machine-emulator/src"
-                "machine-emulator-artifacts/src",
             ],
             "conditions": [
                 ['OS=="mac"', {
@@ -64,6 +62,7 @@
             "cflags_cc!": [ "-fno-exceptions", "-O3" ],
             "defines": [ "NDEBUG" ],
             "include_dirs": [
+                "machine-emulator/src",
                 "machine-emulator-artifacts/src",
                 "machine-emulator/third-party/downloads",
                 "machine-emulator/third-party/llvm-flang-uint128",
@@ -104,6 +103,12 @@
                 "machine-emulator-artifacts/src/uarch-pristine-hash.cpp",
                 "machine-emulator/third-party/tiny_sha3/sha3.c",
             ],
+            "direct_dependent_settings": {
+                "include_dirs": [
+                    "machine-emulator/src",
+                    "machine-emulator-artifacts/src",
+                ]
+            },
             "conditions": [
                 ['OS=="mac"', {
                     "cflags+": ['-fvisibility=hidden'],
