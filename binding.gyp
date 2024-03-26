@@ -1,7 +1,7 @@
 {
     "targets": [
         {
-            "target_name": "binding",
+            "target_name": "<(module_name)",
             "sources": [
                 "src/binding.cc",
                 "src/config.cc",
@@ -119,6 +119,35 @@
                     }
                 }]
             ],
+        },
+        {
+            "target_name": "action_after_build",
+            "type": "none",
+            "dependencies": [ "<(module_name)", "cartesi" ],
+            "conditions": [
+                ['OS=="linux"', {
+                    "copies": [
+                        {
+                            "files": [
+                                "<(PRODUCT_DIR)/cartesi.so",
+                                "<(PRODUCT_DIR)/<(module_name).node"
+                            ],
+                            "destination": "<(module_path)"
+                        }
+                    ]
+                }],
+                ['OS=="mac"', {
+                    "copies": [
+                        {
+                            "files": [
+                                "<(PRODUCT_DIR)/cartesi.dylib",
+                                "<(PRODUCT_DIR)/<(module_name).node"
+                            ],
+                            "destination": "<(module_path)"
+                        }
+                    ]
+                }],
+            ]
         }
     ],
 }
