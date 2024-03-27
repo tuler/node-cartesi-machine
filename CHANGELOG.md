@@ -1,5 +1,11 @@
 # @tuler/node-cartesi-machine
 
+## 0.0.4
+
+### Patch Changes
+
+- 915b22e: fix publishing
+
 ## 0.0.3
 
 ### Patch Changes
