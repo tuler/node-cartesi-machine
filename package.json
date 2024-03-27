@@ -1,6 +1,6 @@
 {
     "name": "@tuler/node-cartesi-machine",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Cartesi Machine Node.js bindings",
     "main": "dist/binding.js",
     "scripts": {
