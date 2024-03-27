@@ -1,5 +1,11 @@
 # @tuler/node-cartesi-machine
 
+## 0.0.5
+
+### Patch Changes
+
+- c508985: fix: add header files to npm package
+
 ## 0.0.4
 
 ### Patch Changes
