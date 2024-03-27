@@ -23,11 +23,11 @@
 #define THROW_IF_WRONG_TYPE_VOID(info, condition) \
     THROW_IF_FALSE_VOID(info, condition, "Wrong argument");
 
-#define THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, min, max) \
-    THROW_IF_FALSE(info, info.Length() >= min && info.Length() <= max, "Wrong number of arguments");
+#define THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, expected) \
+    THROW_IF_FALSE(info, info.Length() != expected, "Wrong number of arguments");
 
-#define THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, min, max) \
-    THROW_IF_FALSE_VOID(info, info.Length() >= min && info.Length() <= max, "Wrong number of arguments");
+#define THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, expected) \
+    THROW_IF_FALSE_VOID(info, info.Length() != expected, "Wrong number of arguments");
 
 #define THROW_IF_CM_ERROR(env, error_code, err_msg)            \
     if (error_code != CM_ERROR_OK)                             \
@@ -198,7 +198,7 @@ Napi::Object Machine::Init(Napi::Env env, Napi::Object exports)
 Machine::Machine(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Machine>(info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 2);
+    THROW_IF_FALSE_VOID(info, (info.Length() >= 1 && info.Length() <= 2), "Wrong number of arguments")
 
     cm_machine *machine = NULL;
     char *err_msg = NULL;
@@ -234,7 +234,7 @@ void Machine::Finalize(Napi::Env env)
 Napi::Value Machine::GetRootHash(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     char *err_msg = NULL;
     Napi::ArrayBuffer buffer = Napi::ArrayBuffer::New(env, sizeof(uint8_t) * CM_MACHINE_HASH_BYTE_SIZE);
     cm_hash *hash = (cm_hash *)buffer.Data();
@@ -245,7 +245,7 @@ Napi::Value Machine::GetRootHash(const Napi::CallbackInfo &info)
 void Machine::Store(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     if (!info[0].IsString())
     {
         Napi::TypeError::New(env, "Wrong argument").ThrowAsJavaScriptException();
@@ -260,7 +260,7 @@ void Machine::Store(const Napi::CallbackInfo &info)
 Napi::Value Machine::Run(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 1);
+    THROW_IF_FALSE(info, info.Length() <= 1, "Wrong number of arguments")
 
     uint64_t mcycle_end = UINT64_MAX;
     if (info.Length() == 1)
@@ -286,7 +286,7 @@ Napi::Value Machine::Run(const Napi::CallbackInfo &info)
 Napi::Value Machine::RunUarch(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 1);
+    THROW_IF_FALSE(info, info.Length() <= 1, "Wrong number of arguments")
 
     uint64_t uarch_cycle_end = UINT64_MAX;
     if (info.Length() == 1)
@@ -312,7 +312,7 @@ Napi::Value Machine::RunUarch(const Napi::CallbackInfo &info)
 Napi::Value Machine::ReadMemory(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 2, 2);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 2);
 
     if (!info[0].IsBigInt() || !info[1].IsBigInt())
     {
@@ -333,7 +333,7 @@ Napi::Value Machine::ReadMemory(const Napi::CallbackInfo &info)
 void Machine::WriteMemory(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2, 2);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2);
 
     if (!info[0].IsBigInt() || !info[1].IsArrayBuffer())
     {
@@ -354,7 +354,7 @@ void Machine::WriteMemory(const Napi::CallbackInfo &info)
 Napi::Value Machine::ReadWord(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 1);
 
     if (!info[0].IsBigInt())
     {
@@ -374,7 +374,7 @@ Napi::Value Machine::ReadWord(const Napi::CallbackInfo &info)
 Napi::Value Machine::ReadVirtualMemory(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 2, 2);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 2);
 
     if (!info[0].IsBigInt() || !info[1].IsBigInt())
     {
@@ -395,7 +395,7 @@ Napi::Value Machine::ReadVirtualMemory(const Napi::CallbackInfo &info)
 void Machine::WriteVirtualMemory(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2, 2);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2);
 
     if (!info[0].IsBigInt() || !info[1].IsArrayBuffer())
     {
@@ -416,7 +416,7 @@ void Machine::WriteVirtualMemory(const Napi::CallbackInfo &info)
 void Machine::Snapshot(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(env, cm_snapshot(this->machine, &err_msg), err_msg);
     return;
@@ -425,7 +425,7 @@ void Machine::Snapshot(const Napi::CallbackInfo &info)
 void Machine::Rollback(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(env, cm_rollback(this->machine, &err_msg), err_msg);
     return;
@@ -434,7 +434,7 @@ void Machine::Rollback(const Napi::CallbackInfo &info)
 Napi::Value Machine::GetProof(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 2, 2);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 2);
 
     if (!info[0].IsBigInt() || !info[1].IsNumber())
     {
@@ -456,7 +456,7 @@ Napi::Value Machine::GetProof(const Napi::CallbackInfo &info)
 Napi::Value Machine::VerifyMerkleTree(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     bool result;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(env, cm_verify_merkle_tree(this->machine, &result, &err_msg), err_msg);
@@ -466,7 +466,7 @@ Napi::Value Machine::VerifyMerkleTree(const Napi::CallbackInfo &info)
 Napi::Value Machine::VerifyDirtyPageMaps(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     bool result;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(env, cm_verify_dirty_page_maps(this->machine, &result, &err_msg), err_msg);
@@ -475,7 +475,7 @@ Napi::Value Machine::VerifyDirtyPageMaps(const Napi::CallbackInfo &info)
 
 void Machine::ReplaceMemoryRange(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsObject());
     MemoryRangeConfig object = MemoryRangeConfig(info.Env(), info[0].As<Napi::Object>());
     cm_memory_range_config config = {};
@@ -486,7 +486,7 @@ void Machine::ReplaceMemoryRange(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadPc(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_pc(this->machine, &value, &err_msg), err_msg);
@@ -495,7 +495,7 @@ Napi::Value Machine::ReadPc(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadFcsr(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_fcsr(this->machine, &value, &err_msg), err_msg);
@@ -504,7 +504,7 @@ Napi::Value Machine::ReadFcsr(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMcycle(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mcycle(this->machine, &value, &err_msg), err_msg);
@@ -513,7 +513,7 @@ Napi::Value Machine::ReadMcycle(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadIcycleinstret(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_icycleinstret(this->machine, &value, &err_msg), err_msg);
@@ -522,7 +522,7 @@ Napi::Value Machine::ReadIcycleinstret(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMstatus(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mstatus(this->machine, &value, &err_msg), err_msg);
@@ -531,7 +531,7 @@ Napi::Value Machine::ReadMstatus(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMenvcfg(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_menvcfg(this->machine, &value, &err_msg), err_msg);
@@ -540,7 +540,7 @@ Napi::Value Machine::ReadMenvcfg(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMtvec(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mtvec(this->machine, &value, &err_msg), err_msg);
@@ -549,7 +549,7 @@ Napi::Value Machine::ReadMtvec(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMscratch(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mscratch(this->machine, &value, &err_msg), err_msg);
@@ -558,7 +558,7 @@ Napi::Value Machine::ReadMscratch(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMepc(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mepc(this->machine, &value, &err_msg), err_msg);
@@ -567,7 +567,7 @@ Napi::Value Machine::ReadMepc(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMcause(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mcause(this->machine, &value, &err_msg), err_msg);
@@ -576,7 +576,7 @@ Napi::Value Machine::ReadMcause(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMtval(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mtval(this->machine, &value, &err_msg), err_msg);
@@ -585,7 +585,7 @@ Napi::Value Machine::ReadMtval(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMisa(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_misa(this->machine, &value, &err_msg), err_msg);
@@ -594,7 +594,7 @@ Napi::Value Machine::ReadMisa(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMie(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mie(this->machine, &value, &err_msg), err_msg);
@@ -603,7 +603,7 @@ Napi::Value Machine::ReadMie(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMip(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mip(this->machine, &value, &err_msg), err_msg);
@@ -612,7 +612,7 @@ Napi::Value Machine::ReadMip(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMedeleg(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_medeleg(this->machine, &value, &err_msg), err_msg);
@@ -621,7 +621,7 @@ Napi::Value Machine::ReadMedeleg(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMideleg(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mideleg(this->machine, &value, &err_msg), err_msg);
@@ -630,7 +630,7 @@ Napi::Value Machine::ReadMideleg(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMcounteren(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mcounteren(this->machine, &value, &err_msg), err_msg);
@@ -639,7 +639,7 @@ Napi::Value Machine::ReadMcounteren(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadStvec(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_stvec(this->machine, &value, &err_msg), err_msg);
@@ -648,7 +648,7 @@ Napi::Value Machine::ReadStvec(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadSscratch(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_sscratch(this->machine, &value, &err_msg), err_msg);
@@ -657,7 +657,7 @@ Napi::Value Machine::ReadSscratch(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadSepc(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_sepc(this->machine, &value, &err_msg), err_msg);
@@ -666,7 +666,7 @@ Napi::Value Machine::ReadSepc(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadScause(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_scause(this->machine, &value, &err_msg), err_msg);
@@ -675,7 +675,7 @@ Napi::Value Machine::ReadScause(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadStval(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_stval(this->machine, &value, &err_msg), err_msg);
@@ -684,7 +684,7 @@ Napi::Value Machine::ReadStval(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadSatp(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_satp(this->machine, &value, &err_msg), err_msg);
@@ -693,7 +693,7 @@ Napi::Value Machine::ReadSatp(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadScounteren(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_scounteren(this->machine, &value, &err_msg), err_msg);
@@ -702,7 +702,7 @@ Napi::Value Machine::ReadScounteren(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadSenvcfg(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_senvcfg(this->machine, &value, &err_msg), err_msg);
@@ -711,7 +711,7 @@ Napi::Value Machine::ReadSenvcfg(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadIlrsc(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_ilrsc(this->machine, &value, &err_msg), err_msg);
@@ -720,7 +720,7 @@ Napi::Value Machine::ReadIlrsc(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadIflags(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_iflags(this->machine, &value, &err_msg), err_msg);
@@ -729,7 +729,7 @@ Napi::Value Machine::ReadIflags(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadHtifTohost(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_htif_tohost(this->machine, &value, &err_msg), err_msg);
@@ -738,7 +738,7 @@ Napi::Value Machine::ReadHtifTohost(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadHtifFromhost(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_htif_fromhost(this->machine, &value, &err_msg), err_msg);
@@ -747,7 +747,7 @@ Napi::Value Machine::ReadHtifFromhost(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadHtifIhalt(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_htif_ihalt(this->machine, &value, &err_msg), err_msg);
@@ -756,7 +756,7 @@ Napi::Value Machine::ReadHtifIhalt(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadHtifIconsole(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_htif_iconsole(this->machine, &value, &err_msg), err_msg);
@@ -765,7 +765,7 @@ Napi::Value Machine::ReadHtifIconsole(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadHtifIyield(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_htif_iyield(this->machine, &value, &err_msg), err_msg);
@@ -774,7 +774,7 @@ Napi::Value Machine::ReadHtifIyield(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadClintMtimecmp(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_clint_mtimecmp(this->machine, &value, &err_msg), err_msg);
@@ -783,7 +783,7 @@ Napi::Value Machine::ReadClintMtimecmp(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadUarchPc(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_uarch_pc(this->machine, &value, &err_msg), err_msg);
@@ -792,7 +792,7 @@ Napi::Value Machine::ReadUarchPc(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadUarchCycle(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_uarch_cycle(this->machine, &value, &err_msg), err_msg);
@@ -801,7 +801,7 @@ Napi::Value Machine::ReadUarchCycle(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMvendorid(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mvendorid(this->machine, &value, &err_msg), err_msg);
@@ -810,7 +810,7 @@ Napi::Value Machine::ReadMvendorid(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMarchid(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_marchid(this->machine, &value, &err_msg), err_msg);
@@ -819,7 +819,7 @@ Napi::Value Machine::ReadMarchid(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadMimpid(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_mimpid(this->machine, &value, &err_msg), err_msg);
@@ -828,7 +828,7 @@ Napi::Value Machine::ReadMimpid(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadHtifTohostDev(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_htif_tohost_dev(this->machine, &value, &err_msg), err_msg);
@@ -837,7 +837,7 @@ Napi::Value Machine::ReadHtifTohostDev(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadHtifTohostCmd(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_htif_tohost_cmd(this->machine, &value, &err_msg), err_msg);
@@ -846,7 +846,7 @@ Napi::Value Machine::ReadHtifTohostCmd(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadHtifTohostData(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_htif_tohost_data(this->machine, &value, &err_msg), err_msg);
@@ -855,7 +855,7 @@ Napi::Value Machine::ReadHtifTohostData(const Napi::CallbackInfo &info)
 
 void Machine::WritePc(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -865,7 +865,7 @@ void Machine::WritePc(const Napi::CallbackInfo &info)
 
 void Machine::WriteFcsr(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -875,7 +875,7 @@ void Machine::WriteFcsr(const Napi::CallbackInfo &info)
 
 void Machine::WriteMcycle(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -885,7 +885,7 @@ void Machine::WriteMcycle(const Napi::CallbackInfo &info)
 
 void Machine::WriteIcycleinstret(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -895,7 +895,7 @@ void Machine::WriteIcycleinstret(const Napi::CallbackInfo &info)
 
 void Machine::WriteMstatus(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -905,7 +905,7 @@ void Machine::WriteMstatus(const Napi::CallbackInfo &info)
 
 void Machine::WriteMenvcfg(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -915,7 +915,7 @@ void Machine::WriteMenvcfg(const Napi::CallbackInfo &info)
 
 void Machine::WriteMtvec(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -925,7 +925,7 @@ void Machine::WriteMtvec(const Napi::CallbackInfo &info)
 
 void Machine::WriteMscratch(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -935,7 +935,7 @@ void Machine::WriteMscratch(const Napi::CallbackInfo &info)
 
 void Machine::WriteMepc(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -945,7 +945,7 @@ void Machine::WriteMepc(const Napi::CallbackInfo &info)
 
 void Machine::WriteMcause(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -955,7 +955,7 @@ void Machine::WriteMcause(const Napi::CallbackInfo &info)
 
 void Machine::WriteMtval(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -965,7 +965,7 @@ void Machine::WriteMtval(const Napi::CallbackInfo &info)
 
 void Machine::WriteMisa(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -975,7 +975,7 @@ void Machine::WriteMisa(const Napi::CallbackInfo &info)
 
 void Machine::WriteMie(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -985,7 +985,7 @@ void Machine::WriteMie(const Napi::CallbackInfo &info)
 
 void Machine::WriteMip(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -995,7 +995,7 @@ void Machine::WriteMip(const Napi::CallbackInfo &info)
 
 void Machine::WriteMedeleg(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1005,7 +1005,7 @@ void Machine::WriteMedeleg(const Napi::CallbackInfo &info)
 
 void Machine::WriteMideleg(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1015,7 +1015,7 @@ void Machine::WriteMideleg(const Napi::CallbackInfo &info)
 
 void Machine::WriteMcounteren(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1025,7 +1025,7 @@ void Machine::WriteMcounteren(const Napi::CallbackInfo &info)
 
 void Machine::WriteStvec(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1035,7 +1035,7 @@ void Machine::WriteStvec(const Napi::CallbackInfo &info)
 
 void Machine::WriteSscratch(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1045,7 +1045,7 @@ void Machine::WriteSscratch(const Napi::CallbackInfo &info)
 
 void Machine::WriteSepc(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1055,7 +1055,7 @@ void Machine::WriteSepc(const Napi::CallbackInfo &info)
 
 void Machine::WriteScause(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1065,7 +1065,7 @@ void Machine::WriteScause(const Napi::CallbackInfo &info)
 
 void Machine::WriteStval(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1075,7 +1075,7 @@ void Machine::WriteStval(const Napi::CallbackInfo &info)
 
 void Machine::WriteSatp(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1085,7 +1085,7 @@ void Machine::WriteSatp(const Napi::CallbackInfo &info)
 
 void Machine::WriteScounteren(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1095,7 +1095,7 @@ void Machine::WriteScounteren(const Napi::CallbackInfo &info)
 
 void Machine::WriteSenvcfg(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1105,7 +1105,7 @@ void Machine::WriteSenvcfg(const Napi::CallbackInfo &info)
 
 void Machine::WriteIlrsc(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1115,7 +1115,7 @@ void Machine::WriteIlrsc(const Napi::CallbackInfo &info)
 
 void Machine::WriteIflags(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1125,7 +1125,7 @@ void Machine::WriteIflags(const Napi::CallbackInfo &info)
 
 void Machine::WriteHtifTohost(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1135,7 +1135,7 @@ void Machine::WriteHtifTohost(const Napi::CallbackInfo &info)
 
 void Machine::WriteHtifFromhost(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1145,7 +1145,7 @@ void Machine::WriteHtifFromhost(const Napi::CallbackInfo &info)
 
 void Machine::WriteHtifIhalt(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1155,7 +1155,7 @@ void Machine::WriteHtifIhalt(const Napi::CallbackInfo &info)
 
 void Machine::WriteHtifIconsole(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1165,7 +1165,7 @@ void Machine::WriteHtifIconsole(const Napi::CallbackInfo &info)
 
 void Machine::WriteHtifIyield(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1175,7 +1175,7 @@ void Machine::WriteHtifIyield(const Napi::CallbackInfo &info)
 
 void Machine::WriteClintMtimecmp(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1185,7 +1185,7 @@ void Machine::WriteClintMtimecmp(const Napi::CallbackInfo &info)
 
 void Machine::WriteUarchPc(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1195,7 +1195,7 @@ void Machine::WriteUarchPc(const Napi::CallbackInfo &info)
 
 void Machine::WriteUarchCycle(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1205,7 +1205,7 @@ void Machine::WriteUarchCycle(const Napi::CallbackInfo &info)
 
 void Machine::WriteHtifFromhostData(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -1216,7 +1216,7 @@ void Machine::WriteHtifFromhostData(const Napi::CallbackInfo &info)
 Napi::Value Machine::ReadIflagsX(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     bool result;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_iflags_X(this->machine, &result, &err_msg), err_msg);
@@ -1226,7 +1226,7 @@ Napi::Value Machine::ReadIflagsX(const Napi::CallbackInfo &info)
 Napi::Value Machine::ReadIflagsY(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     bool result;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_iflags_Y(this->machine, &result, &err_msg), err_msg);
@@ -1236,7 +1236,7 @@ Napi::Value Machine::ReadIflagsY(const Napi::CallbackInfo &info)
 Napi::Value Machine::ReadIflagsH(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     bool result;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_iflags_H(this->machine, &result, &err_msg), err_msg);
@@ -1246,7 +1246,7 @@ Napi::Value Machine::ReadIflagsH(const Napi::CallbackInfo &info)
 Napi::Value Machine::ReadUarchHaltFlag(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     bool result;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_uarch_halt_flag(this->machine, &result, &err_msg), err_msg);
@@ -1255,56 +1255,56 @@ Napi::Value Machine::ReadUarchHaltFlag(const Napi::CallbackInfo &info)
 
 void Machine::SetIflagsX(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(info.Env(), cm_set_iflags_X(this->machine, &err_msg), err_msg);
 }
 
 void Machine::SetIflagsY(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(info.Env(), cm_set_iflags_Y(this->machine, &err_msg), err_msg);
 }
 
 void Machine::SetIflagsH(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(info.Env(), cm_set_iflags_H(this->machine, &err_msg), err_msg);
 }
 
 void Machine::SetUarchHaltFlag(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(info.Env(), cm_set_uarch_halt_flag(this->machine, &err_msg), err_msg);
 }
 
 void Machine::ResetIflagsX(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(info.Env(), cm_reset_iflags_X(this->machine, &err_msg), err_msg);
 }
 
 void Machine::ResetIflagsY(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(info.Env(), cm_reset_iflags_Y(this->machine, &err_msg), err_msg);
 }
 
 void Machine::ResetUarchHaltFlag(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(info.Env(), cm_reset_uarch(this->machine, &err_msg), err_msg);
 }
 
 Napi::Value Machine::ReadX(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 1);
     THROW_IF_WRONG_TYPE(info, info[0].IsNumber());
     int i = info[0].As<Napi::Number>().Int32Value();
     uint64_t value;
@@ -1315,7 +1315,7 @@ Napi::Value Machine::ReadX(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadF(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 1);
     THROW_IF_WRONG_TYPE(info, info[0].IsNumber());
     int i = info[0].As<Napi::Number>().Int32Value();
     uint64_t value;
@@ -1326,7 +1326,7 @@ Napi::Value Machine::ReadF(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadUarchX(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 1);
     THROW_IF_WRONG_TYPE(info, info[0].IsNumber());
     int i = info[0].As<Napi::Number>().Int32Value();
     uint64_t value;
@@ -1337,7 +1337,7 @@ Napi::Value Machine::ReadUarchX(const Napi::CallbackInfo &info)
 
 void Machine::WriteX(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2, 2);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsNumber());
     THROW_IF_WRONG_TYPE_VOID(info, info[1].IsBigInt());
     int i = info[0].As<Napi::Number>().Int32Value();
@@ -1349,7 +1349,7 @@ void Machine::WriteX(const Napi::CallbackInfo &info)
 
 void Machine::WriteF(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2, 2);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsNumber());
     THROW_IF_WRONG_TYPE_VOID(info, info[1].IsBigInt());
     int i = info[0].As<Napi::Number>().Int32Value();
@@ -1361,7 +1361,7 @@ void Machine::WriteF(const Napi::CallbackInfo &info)
 
 void Machine::WriteUarchX(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2, 2);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsNumber());
     THROW_IF_WRONG_TYPE_VOID(info, info[1].IsBigInt());
     int i = info[0].As<Napi::Number>().Int32Value();
@@ -1373,7 +1373,7 @@ void Machine::WriteUarchX(const Napi::CallbackInfo &info)
 
 Napi::Value Machine::ReadCsr(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 1);
     THROW_IF_WRONG_TYPE(info, info[0].IsNumber());
     CM_PROC_CSR r = static_cast<CM_PROC_CSR>(info[0].As<Napi::Number>().Int32Value());
     uint64_t value;
@@ -1384,7 +1384,7 @@ Napi::Value Machine::ReadCsr(const Napi::CallbackInfo &info)
 
 void Machine::WriteCsr(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2, 2);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 2);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsNumber());
     THROW_IF_WRONG_TYPE_VOID(info, info[1].IsBigInt());
     CM_PROC_CSR w = static_cast<CM_PROC_CSR>(info[0].As<Napi::Number>().Int32Value());

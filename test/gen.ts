@@ -72,7 +72,7 @@ const defReset = (name: string) =>
 const implementationRead = (name: string) => `
 Napi::Value Machine::Read${toPascalCase(name)}(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     uint64_t value;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_${name}(this->machine, &value, &err_msg), err_msg);
@@ -82,7 +82,7 @@ Napi::Value Machine::Read${toPascalCase(name)}(const Napi::CallbackInfo &info)
 const implementationWrite = (name: string) => `
 void Machine::Write${toPascalCase(name)}(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1, 1);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 1);
     THROW_IF_WRONG_TYPE_VOID(info, info[0].IsBigInt());
     bool lossless;
     uint64_t value = info[0].As<Napi::BigInt>().Uint64Value(&lossless);
@@ -94,7 +94,7 @@ const implementationReadBool = (name: string) => `
 Napi::Value Machine::Read${toPascalCase(name)}(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS(info, 0);
     bool result;
     char *err_msg = NULL;
     THROW_IF_CM_ERROR(info.Env(), cm_read_${name}(this->machine, &result, &err_msg), err_msg);
@@ -104,7 +104,7 @@ Napi::Value Machine::Read${toPascalCase(name)}(const Napi::CallbackInfo &info)
 const implementationSetBool = (name: string) => `
 void Machine::Set${toPascalCase(name)}(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(info.Env(), cm_set_${name}(this->machine, &err_msg), err_msg);
 }`;
@@ -112,7 +112,7 @@ void Machine::Set${toPascalCase(name)}(const Napi::CallbackInfo &info)
 const implementationResetBool = (name: string) => `
 void Machine::Reset${toPascalCase(name)}(const Napi::CallbackInfo &info)
 {
-    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0, 0);
+    THROW_IF_WRONG_NUMBER_OF_ARGUMENTS_VOID(info, 0);
     char *err_msg = NULL;
     THROW_IF_CM_ERROR_VOID(info.Env(), cm_reset_${name}(this->machine, &err_msg), err_msg);
 }`;

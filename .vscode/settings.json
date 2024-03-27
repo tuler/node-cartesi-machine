@@ -6,6 +6,10 @@
         "*.sol": "solidity",
         "ios": "cpp",
         "charconv": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "limits": "cpp",
+        "ratio": "cpp",
+        "algorithm": "cpp",
+        "chrono": "cpp"
     }
 }
