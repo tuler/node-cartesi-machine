@@ -134,6 +134,8 @@ jobs:
             - name: Publish package
               if: steps.changesets.outputs.hasChangesets == 'false'
               run: pnpm release
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
             - name: Publish binaries
               uses: softprops/action-gh-release@v2
