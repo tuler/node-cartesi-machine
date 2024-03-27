@@ -116,20 +116,16 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Get published package version
+            - name: Get package version
               id: version
-              run: |
-                  VERSION=$(echo $changeset_outputs_published_packages | jq '.[0].version')
-                  echo "::set-output name=version::$VERSION"
-              env:
-                  changeset_outputs_published_packages: ${{ steps.changesets.outputs.publishedPackages }}
+              uses: martinbeentjes/npm-get-version-action@v1.3.1
 
             - name: Download binaries
               uses: actions/download-artifact@v4
               if: steps.changesets.outputs.hasChangesets == 'false'
               with:
                   pattern: binary-*
-                  path: build/stage/${{ steps.version.outputs.version }}
+                  path: build/stage/${{ steps.version.outputs.current-version }}
                   merge-multiple: true
 
             - name: Publish package
@@ -142,5 +138,5 @@ jobs:
               uses: softprops/action-gh-release@v2
               if: steps.changesets.outputs.hasChangesets == 'false'
               with:
-                  files: build/stage/${{ steps.version.outputs.version }}/**
-                  tag_name: ${{ steps.version.outputs.version }}
+                  files: build/stage/${{ steps.version.outputs.current-version }}/**
+                  tag_name: v${{ steps.version.outputs.current-version }}
