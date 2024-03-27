@@ -142,5 +142,5 @@ jobs:
               uses: softprops/action-gh-release@v2
               if: steps.changesets.outputs.hasChangesets == 'false'
               with:
-                  files: |
-                      build/stage/${{ steps.version.outputs.version }}/**
+                  files: build/stage/${{ steps.version.outputs.version }}/**
+                  tag_name: ${{ steps.version.outputs.version }}
