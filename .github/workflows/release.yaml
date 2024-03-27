@@ -134,7 +134,7 @@ jobs:
 
             - name: Publish package
               if: steps.changesets.outputs.hasChangesets == 'false'
-              run: pnpm release
+              run: pnpm run release
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
