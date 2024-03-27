@@ -19,7 +19,7 @@
     "binary": {
         "module_name": "node_cartesi_machine",
         "module_path": "./lib/binding/",
-        "host": "https://github.com/tuler/cartesi-machine.js/releases/download/",
+        "host": "https://github.com/tuler/node-cartesi-machine/releases/download/",
         "remote_path": "{version}"
     },
     "keywords": [

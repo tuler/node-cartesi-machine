@@ -1,13 +1,13 @@
-# cartesi-machine.js
+# node-cartesi-machine
 
 This is a JavaScript/TypeScript library for interacting with Cartesi Machines.
 
 ## Installation
 
 ```shell
-npm install cartesi-machine
-# yarn add cartesi-machine
-# pnpm add cartesi-machine
+npm install @tuler/node-cartesi-machine
+# yarn add @tuler/node-cartesi-machine
+# pnpm add @tuler/node-cartesi-machine
 ```
 
 Download the kernel and rootfs used in the code examples below:
@@ -20,7 +20,7 @@ wget -O rootfs.ext2 https://github.com/cartesi/machine-emulator-tools/releases/d
 ## How to use
 
 ```typescript
-import { create, load } from "cartesi-machine";
+import { create, load } from "@tuler/node-cartesi-machine";
 
 // creating a machine
 const bootargs =
