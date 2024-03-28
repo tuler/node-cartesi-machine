@@ -1,5 +1,11 @@
 # @tuler/node-cartesi-machine
 
+## 0.0.8
+
+### Patch Changes
+
+- 251bb48: fix typings
+
 ## 0.0.7
 
 ### Patch Changes
