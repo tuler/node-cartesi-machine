@@ -48,5 +48,16 @@
         "typescript": "^5.4.3",
         "vitest": "^1.4.0"
     },
+    "files": [
+        "dist",
+        "machine-emulator/src",
+        "machine-emulator/third-party/downloads/boost",
+        "machine-emulator/third-party/downloads/json.hpp",
+        "machine-emulator/third-party/llvm-flang-uint128",
+        "machine-emulator/third-party/tiny_sha3",
+        "machine-emulator-artifacts",
+        "src",
+        "binding.gyp"
+    ],
     "packageManager": "pnpm@8.15.5"
 }
