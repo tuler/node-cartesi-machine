@@ -4,12 +4,12 @@
     "description": "Cartesi Machine Node.js bindings",
     "main": "dist/binding.js",
     "module": "dist/binding.mjs",
-    "types": "dist/index.d.ts",
+    "types": "dist/binding.d.ts",
     "exports": {
         ".": {
-            "require": "./dist/index.js",
-            "import": "./dist/index.mjs",
-            "types": "./dist/index.d.ts"
+            "require": "./dist/binding.js",
+            "import": "./dist/binding.mjs",
+            "types": "./dist/binding.d.ts"
         }
     },
     "scripts": {
