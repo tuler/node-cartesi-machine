@@ -1,5 +1,12 @@
 # @tuler/node-cartesi-machine
 
+## 0.0.6
+
+### Patch Changes
+
+- 8c431e0: fix release version number
+- 5918c10: fix npm package contents
+
 ## 0.0.5
 
 ### Patch Changes
