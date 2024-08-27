@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         "declaration": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
@@ -7,6 +8,9 @@
         "outDir": "dist",
         "strict": true,
         "skipLibCheck": true,
-        "target": "es2020"
+        "target": "es2020",
+        "paths": {
+            "@tuler/node-cartesi-machine": ["./src/index.ts"]
+        }
     }
 }

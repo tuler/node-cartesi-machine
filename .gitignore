@@ -1,5 +1,6 @@
 /build
 /dist
+/docs/dist
 /lib/binding/*
 /node_modules
 *.log
