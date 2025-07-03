@@ -26,13 +26,13 @@ export enum Constant {
 }
 
 /// Physical memory addresses
-export enum PmaConstant {
-    CmioRxBufferStart = 0x60000000,
-    CmioRxBufferLog2Size = 21,
-    CmioTxBufferStart = 0x60800000,
-    CmioTxBufferLog2Size = 21,
-    RamStart = 0x80000000,
-}
+export const PmaConstant = {
+    CmioRxBufferStart: 0x60000000n,
+    CmioRxBufferLog2Size: 21,
+    CmioTxBufferStart: 0x60800000n,
+    CmioTxBufferLog2Size: 21,
+    RamStart: 0x80000000n,
+} as const;
 
 /// Error codes returned from the C API
 export enum ErrorCode {
