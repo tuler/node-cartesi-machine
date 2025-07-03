@@ -69,8 +69,8 @@ const machine = create({
     },
 });
 
-// run the machine until it yields or halts // [!code focus]
-const reason = machine.run(0xffffffffffffffffffn); // [!code focus]
+// run the machine until it yields or halts (default is MAX_MCYCLE) // [!code focus]
+const reason = machine.run(); // [!code focus]
 switch (reason) { // [!code focus]
     case BreakReason.YieldedManually: // [!code focus]
         console.log("Machine yielded manually"); // [!code focus]
@@ -107,8 +107,8 @@ const machine = create({
     },
 });
 
-// run the machine until it yields or halts
-const reason = machine.run(0xffffffffffffffffffn);
+// run the machine until it yields or halts (default is MAX_MCYCLE)
+const reason = machine.run();
 switch (reason) {
     case BreakReason.YieldedManually:
         console.log("Machine yielded manually");
@@ -149,8 +149,8 @@ const machine = create({
     },
 });
 
-// run the machine until it yields or halts
-const reason = machine.run(0xffffffffffffffffffn);
+// run the machine until it yields or halts (default is MAX_MCYCLE)
+const reason = machine.run();
 switch (reason) {
     case BreakReason.YieldedManually:
         console.log("Machine yielded manually");

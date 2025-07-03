@@ -1,10 +1,10 @@
 import {
     BreakReason,
     Constant,
-    Reg,
     create,
     empty,
     getRegAddress,
+    Reg,
 } from "../src/cartesi-machine";
 
 /**
@@ -262,13 +262,10 @@ async function executionExample() {
 
         for (const cycles of cycleCounts) {
             console.log(`\nRunning for ${cycles} cycles...`);
-
             const breakReason = machine.run(cycles);
             console.log("Break reason:", BreakReason[breakReason]);
-
             const currentMcycle = machine.readReg(Reg.Mcycle);
             console.log("Current mcycle:", currentMcycle.toString());
-
             const rootHash = machine.getRootHash();
             console.log("Root hash:", rootHash.toString("hex"));
         }

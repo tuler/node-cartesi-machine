@@ -28,8 +28,8 @@ const machine = create({
     },
 });
 
-// Run the machine until it yields or halts
-const reason = machine.run(0xffffffffffffffffffn);
+// Run the machine until it yields or halts (default is MAX_MCYCLE)
+const reason = machine.run();
 if (reason === BreakReason.Halted) {
     console.log("Machine halted");
 }

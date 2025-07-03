@@ -6,7 +6,12 @@ import type {
     Reg,
     UarchBreakReason,
 } from "../cartesi-machine";
-import { Constant, ErrorCode, MachineError } from "../cartesi-machine";
+import {
+    Constant,
+    ErrorCode,
+    MachineError,
+    MAX_MCYCLE,
+} from "../cartesi-machine";
 import type {
     AccessLog,
     AccessLogType,
@@ -642,7 +647,7 @@ export class NodeCartesiMachine {
     /**
      * Runs the machine
      */
-    run(mcycleEnd: bigint): BreakReason {
+    run(mcycleEnd: bigint = MAX_MCYCLE): BreakReason {
         const breakReason = [0];
         const result = cm_run(this.machine, mcycleEnd, breakReason);
         if (result !== ErrorCode.Ok) {

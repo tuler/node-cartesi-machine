@@ -15,8 +15,8 @@ const machine = spawn().create({
     },
 });
 
-// run the machine until it yields or halts
-const reason = machine.run(0xffffffffffffffffffn);
+// run the machine until it yields or halts (default is MAX_MCYCLE)
+const reason = machine.run();
 switch (reason) {
     case BreakReason.YieldedManually:
         console.log("Machine yielded manually");

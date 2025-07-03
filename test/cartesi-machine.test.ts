@@ -4,13 +4,13 @@ import {
     type CartesiMachine,
     BreakReason,
     Constant,
-    ErrorCode,
-    Reg,
     create,
     empty,
+    ErrorCode,
     getDefaultConfig,
     getLastError,
     load,
+    Reg,
 } from "../src/cartesi-machine";
 import { NodeCartesiMachine } from "../src/node/cartesi-machine";
 

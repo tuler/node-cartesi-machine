@@ -12,6 +12,11 @@ import type {
 // Constants and enums
 // -----------------------------------------------------------------------------
 
+/**
+ * The maximum value for mcycle
+ */
+export const MAX_MCYCLE = 0xffffffffffffffffffn;
+
 /// Constants
 export enum Constant {
     HashSize = 32,
@@ -319,7 +324,7 @@ export interface CartesiMachine {
     readVirtualMemory(address: bigint, length: bigint): Buffer;
     writeVirtualMemory(address: bigint, data: Buffer): void;
     translateVirtualAddress(vaddr: bigint): bigint;
-    run(mcycleEnd: bigint): BreakReason;
+    run(mcycleEnd?: bigint): BreakReason;
     runUarch(uarchCycleEnd: bigint): UarchBreakReason;
     resetUarch(): void;
     receiveCmioRequest(): {

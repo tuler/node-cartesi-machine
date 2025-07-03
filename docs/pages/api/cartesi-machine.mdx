@@ -43,7 +43,7 @@ export interface CartesiMachine {
     writeReg(reg: Reg, value: bigint): void;
 
     //// Execution
-    run(mcycleEnd: bigint): BreakReason;
+    run(mcycleEnd?: bigint): BreakReason;
     runUarch(uarchCycleEnd: bigint): UarchBreakReason;
     resetUarch(): void;
 
@@ -274,11 +274,13 @@ writeReg(reg: Reg, value: bigint): void;
 
 ## run
 
-Runs the machine until the given cycle, or until it yields or halts.
+Runs the machine until the given cycle, or until it yields or halts. If no argument is provided, runs until `MAX_MCYCLE` (the maximum cycle value), which is equivalent to running until the machine yields or halts.
 
 ```ts
-run(mcycleEnd: bigint): BreakReason;
+run(mcycleEnd?: bigint): BreakReason;
 ```
+
+**Note:** `MAX_MCYCLE` is exported as a constant and can be used to explicitly specify the maximum cycle value.
 
 ## runUarch
 
