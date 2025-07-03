@@ -42,6 +42,10 @@ export default defineConfig({
                     link: "/api/load",
                 },
                 {
+                    text: "empty",
+                    link: "/empty",
+                },
+                {
                     text: "spawn",
                     link: "/api/spawn",
                 },
