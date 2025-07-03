@@ -50,9 +50,6 @@ console.log(reason);
 // calculate machine root hash
 const hash = machine.getRootHash();
 console.log(hash);
-
-// destroy the machine
-machine.delete();
 ```
 
 What is happening under the hood is that we are spawning a child `cartesi-jsonrpc-machine` process, which hosts a local Cartesi machine, and expose a JSON-RPC server to control it.

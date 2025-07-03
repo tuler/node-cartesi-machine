@@ -14,7 +14,6 @@ export interface CartesiMachine {
     cloneEmpty(): CartesiMachine;
     store(dir: string): void;
     destroy(): void;
-    delete(): void;
     
     //// Configuration
     getDefaultConfig(): MachineConfig;
@@ -137,14 +136,6 @@ Destroys the current machine instance and removes it from the object. Does not d
 
 ```ts
 destroy(): void;
-```
-
-## delete
-
-Deletes the machine object. If the object is not empty, destroys the instance first. The object must not be used after this call.
-
-```ts
-delete(): void;
 ```
 
 ## getDefaultConfig

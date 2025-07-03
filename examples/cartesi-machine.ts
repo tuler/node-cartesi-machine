@@ -73,10 +73,6 @@ async function basicMachineExample() {
         console.log("Storing machine...");
         machine.store("./machine-state");
         console.log("Machine stored successfully");
-
-        // Clean up
-        machine.delete();
-        console.log("Machine deleted");
     } catch (error) {
         console.error("Error:", error);
     }
@@ -117,10 +113,6 @@ async function memoryOperationsExample() {
             const word = machine.readWord(address + BigInt(i * 8));
             console.log(`Word ${i}: 0x${word.toString(16).padStart(16, "0")}`);
         }
-
-        // Clean up
-        machine.delete();
-        console.log("Memory operations completed");
     } catch (error) {
         console.error("Error:", error);
     }
@@ -172,10 +164,6 @@ async function registerOperationsExample() {
             const address = getRegAddress(reg);
             console.log(`${name} address: 0x${address.toString(16)}`);
         }
-
-        // Clean up
-        machine.delete();
-        console.log("Register operations completed");
     } catch (error) {
         console.error("Error:", error);
     }
@@ -227,10 +215,6 @@ async function merkleTreeExample() {
             "Dirty page maps:",
             areDirtyMapsValid ? "Valid" : "Invalid",
         );
-
-        // Clean up
-        machine.delete();
-        console.log("Merkle tree operations completed");
     } catch (error) {
         console.error("Error:", error);
     }
@@ -279,10 +263,6 @@ async function executionExample() {
         console.log("Resetting microarchitecture...");
         machine.resetUarch();
         console.log("Microarchitecture reset");
-
-        // Clean up
-        machine.delete();
-        console.log("Execution example completed");
     } catch (error) {
         console.error("Error:", error);
     }
@@ -301,7 +281,6 @@ async function errorHandlingExample() {
         try {
             const machine = create({ ram: { length: -1 } });
             console.log("Unexpected: Machine created successfully");
-            machine.delete();
         } catch (error) {
             console.log("Expected error caught:", (error as Error).message);
         }
@@ -327,11 +306,6 @@ async function errorHandlingExample() {
         } catch (error) {
             console.log("Expected error caught:", (error as Error).message);
         }
-
-        // Clean up
-        machine.delete();
-        emptyMachine.delete();
-        console.log("Error handling example completed");
     } catch (error) {
         console.error("Unexpected error:", error);
     }
