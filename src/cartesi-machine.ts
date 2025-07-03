@@ -359,7 +359,6 @@ export interface CartesiMachine {
     ): void;
     verifyMerkleTree(): boolean;
     verifyDirtyPageMaps(): boolean;
-    delete(): void;
 }
 
 export function empty(): CartesiMachine {

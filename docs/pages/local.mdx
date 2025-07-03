@@ -126,58 +126,13 @@ const hash = machine.getRootHash(); // [!code focus]
 console.log(hash); // [!code focus]
 ```
 
-## Cleaning up
-
-Finally, after being done using the machine the resources allocated can be freed by calling the `delete()` method:
-
-```ts twoslash
-import { BreakReason, create } from "@tuler/node-cartesi-machine";
-
-// create a basic machine that print Hello world
-const machine = create({
-    ram: {
-        length: 0x8000000, // 128MB of RAM
-        image_filename: "linux.bin",
-    },
-    flash_drive: [
-        {
-            image_filename: "rootfs.ext2",
-        },
-    ],
-    dtb: {
-        entrypoint: "echo Hello world!",
-    },
-});
-
-// run the machine until it yields or halts (default is MAX_MCYCLE)
-const reason = machine.run();
-switch (reason) {
-    case BreakReason.YieldedManually:
-        console.log("Machine yielded manually");
-        break;
-    case BreakReason.Halted:
-        console.log("Machine halted");
-        break;
-    default:
-        console.log(`Machine halted: ${reason}`);
-}
-console.log(reason);
-
-// calculate machine root hash
-const hash = machine.getRootHash();
-console.log(hash);
-
-// destroy the machine // [!code focus]
-machine.delete(); // [!code focus]
-```
-
 The complete `CartesiMachine` API is available in the API section.
 
 ## Memory Management
 
-The API automatically handles memory management for machine objects.
-When you call `delete()` on a machine, it properly cleans up the underlying C resources.
-Always call `delete()` when you're done with a machine to prevent memory leaks.
+The API automatically handles memory management for machine objects. When a `machine` instance is garbage collected by Node.js, its underlying C resources are automatically cleaned up.
+
+However, you can also explicitly free the resources held by a machine object by calling its `destroy()` method. This is useful if you want to immediately release native resources without waiting for garbage collection.
 
 ## Thread Safety
 

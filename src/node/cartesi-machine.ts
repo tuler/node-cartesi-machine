@@ -254,6 +254,12 @@ enum AccessLogTypeEnum {
 /**
  * High-level wrapper for the Cartesi Machine C API
  */
+const machineFinalizer = new FinalizationRegistry((machineHandle: any) => {
+    if (machineHandle) {
+        cm_delete(machineHandle);
+    }
+});
+
 export class NodeCartesiMachine {
     protected machine: any = null;
 
@@ -322,6 +328,7 @@ export class NodeCartesiMachine {
 
     constructor(machine: any) {
         this.machine = machine;
+        machineFinalizer.register(this, machine);
     }
 
     /**
@@ -995,13 +1002,5 @@ export class NodeCartesiMachine {
             throw MachineError.fromCode(error);
         }
         return result[0];
-    }
-
-    /**
-     * Deletes the machine object
-     */
-    delete(): void {
-        cm_delete(this.machine);
-        this.machine = null;
     }
 }

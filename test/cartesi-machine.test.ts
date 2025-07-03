@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
     type CartesiMachine,
     BreakReason,
@@ -27,18 +27,11 @@ describe("CartesiMachine", () => {
         machine = create(config);
     });
 
-    afterEach(() => {
-        if (machine) {
-            machine.delete();
-        }
-    });
-
     describe("Static Methods", () => {
         it("should create a new empty machine", () => {
             const emptyMachine = empty();
             expect(emptyMachine).toBeInstanceOf(NodeCartesiMachine);
             expect(emptyMachine.isEmpty()).toBe(true);
-            emptyMachine.delete();
         });
 
         it("should clone an empty machine", () => {
@@ -46,8 +39,6 @@ describe("CartesiMachine", () => {
             const cloned = original.cloneEmpty();
             expect(cloned).toBeInstanceOf(NodeCartesiMachine);
             expect(cloned.isEmpty()).toBe(true);
-            original.delete();
-            cloned.delete();
         });
 
         it("should get default configuration", () => {
@@ -104,7 +95,6 @@ describe("CartesiMachine", () => {
             expect(loadedMachine.isEmpty()).toBe(false);
 
             // Clean up
-            loadedMachine.delete();
             fs.rmSync(testDir, { recursive: true, force: true });
         });
     });
@@ -341,8 +331,6 @@ describe("CartesiMachine", () => {
             expect(() => {
                 emptyMachine.getRootHash();
             }).toThrow();
-
-            emptyMachine.delete();
         });
     });
 

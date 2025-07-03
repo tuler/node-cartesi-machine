@@ -32,6 +32,3 @@ console.log(reason);
 // calculate machine root hash
 const hash = machine.getRootHash();
 console.log(hash);
-
-// destroy the machine
-machine.delete();

@@ -8,7 +8,7 @@
         "outDir": "dist",
         "strict": true,
         "skipLibCheck": true,
-        "target": "es2020",
+        "target": "es2021",
         "paths": {
             "@tuler/node-cartesi-machine": ["./src/index.ts"]
         }
