@@ -2,9 +2,9 @@ import { connect, spawn } from "../src/remote-cartesi-machine";
 
 async function example() {
     try {
-        // Spawn a new remote machine server
+        // Spawn a new remote machine server with default address
         console.log("Spawning remote machine server...");
-        const remoteMachine = spawn("127.0.0.1:0", 5000);
+        const remoteMachine = spawn();
 
         // Get server information from the spawned instance
         console.log("Server bound address:", remoteMachine.getBoundAddress());

@@ -1,6 +1,6 @@
 import { BreakReason, spawn } from "@tuler/node-cartesi-machine";
 
-const machine = spawn("127.0.0.1:0").create({
+const machine = spawn().create({
     ram: {
         length: 0x8000000, // 128MB of RAM
         image_filename: "linux.bin",

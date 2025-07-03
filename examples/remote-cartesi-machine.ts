@@ -8,8 +8,8 @@ async function exampleSpawnServer() {
     console.log("=== Spawning a new JSON-RPC server ===");
 
     try {
-        // Spawn a new server on 127.0.0.1:0
-        const machine = spawn("127.0.0.1:0", 5000);
+        // Spawn a new server with default address (127.0.0.1:0)
+        const machine = spawn();
 
         console.log("Server spawned successfully");
         console.log("Server version:", machine.getServerVersion());
@@ -33,8 +33,8 @@ async function exampleConnectToServer() {
     console.log("=== Connecting to existing server ===");
 
     try {
-        // Spawn a new server on 127.0.0.1:0
-        const server = spawn("127.0.0.1:0", 5000);
+        // Spawn a new server with default address (127.0.0.1:0)
+        const server = spawn();
         console.log("Server spawned successfully");
         console.log("Server version:", server.getServerVersion());
 
@@ -57,7 +57,7 @@ async function exampleForkServer() {
 
     try {
         // First create or connect to a server
-        const originalMachine = spawn("127.0.0.1:0", 5000);
+        const originalMachine = spawn();
 
         // Fork the server
         const forkedMachine = originalMachine.fork();
@@ -81,7 +81,7 @@ async function exampleRebindServer() {
     console.log("=== Rebinding server ===");
 
     try {
-        const machine = spawn("127.0.0.1:0", 5000);
+        const machine = spawn();
 
         console.log("Original server address:", machine.getServerAddress());
         console.log("Original bound address:", machine.getBoundAddress());
@@ -104,7 +104,7 @@ async function exampleServerManagement() {
 
     try {
         // Create a server
-        const machine = spawn("127.0.0.1:0", 5000);
+        const machine = spawn();
 
         // Get comprehensive server information
         const serverVersion = machine.getServerVersion();
@@ -168,7 +168,7 @@ async function exampleCleanup() {
     console.log("=== Cleanup example ===");
 
     try {
-        const machine = spawn("127.0.0.1:0", 5000);
+        const machine = spawn();
 
         console.log("Server created, will be cleaned up automatically");
 

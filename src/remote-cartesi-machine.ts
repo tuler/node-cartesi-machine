@@ -36,7 +36,7 @@ export interface RemoteCartesiMachine extends CartesiMachine {
 // -----------------------------------------------------------------------------
 
 export function spawn(
-    address: string,
+    address: string = "127.0.0.1:0",
     timeout: number = -1,
 ): RemoteCartesiMachine {
     return NodeRemoteCartesiMachine.spawn(address, timeout);

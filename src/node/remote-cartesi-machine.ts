@@ -51,7 +51,7 @@ export class NodeRemoteCartesiMachine extends NodeCartesiMachine {
     private serverPid: number | null = null;
 
     static spawn(
-        address: string,
+        address: string = "127.0.0.1:0",
         spawnTimeoutMs: number = -1,
     ): NodeRemoteCartesiMachine {
         const newMachinePtr: [any] = [null];

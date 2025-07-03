@@ -5,10 +5,10 @@ Spawns a new remote Cartesi machine server process, binding it to a specified ad
 ## Function Signature
 
 ```ts
-spawn(address: string, timeout?: number): Promise<RemoteCartesiMachine>
+spawn(address?: string, timeout?: number): RemoteCartesiMachine
 ```
 
-- `address`: The address (`host:port`) to bind the new remote machine server, where `host` must be `127.0.0.1`. Port can be `0` to request an ephemeral port.
+- `address` (optional): The address (`host:port`) to bind the new remote machine server, where `host` must be `127.0.0.1`. Port can be `0` to request an ephemeral port. Defaults to `"127.0.0.1:0"`.
 - `timeout` (optional): Maximum time in milliseconds to wait for the remote server to spawn before giving up and returning an error. Use `-1` for no timeout.
 
 ## Example
@@ -16,8 +16,8 @@ spawn(address: string, timeout?: number): Promise<RemoteCartesiMachine>
 ```ts twoslash
 import { spawn } from "@tuler/node-cartesi-machine";
 
-// Spawn a new remote machine server on localhost:5000
-const remoteMachine = await spawn("127.0.0.1:5000");
+// Spawn a new remote machine server with default address (127.0.0.1:0)
+const remoteMachine = await spawn();
 
 // You can now use remoteMachine as a RemoteCartesiMachine
 const version = remoteMachine.getServerVersion();
