@@ -4,7 +4,7 @@ This is a JavaScript/TypeScript library for interacting with Cartesi Machines.
 
 ## Documentation
 
-Documentation is available at [http://tuler.github.com/node-cartesi-machine](http://tuler.github.com/node-cartesi-machine)
+Documentation is available at [https://tuler.github.io/node-cartesi-machine/](https://tuler.github.io/node-cartesi-machine/)
 
 ## Building
 
