@@ -1,5 +1,12 @@
 # @tuler/node-cartesi-machine
 
+## 0.3.0
+
+### Minor Changes
+
+- 5403f30: remove the exposed delete method, and use a finalizer to automatically call cm_delete on garbage collected machines
+- 1632cd7: change default packaging to ESM (still providing CommonJS compatibility)
+
 ## 0.2.0
 
 ### Minor Changes
