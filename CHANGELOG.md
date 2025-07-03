@@ -1,5 +1,21 @@
 # @tuler/node-cartesi-machine
 
+## 0.2.0
+
+### Minor Changes
+
+- 797f2b2: The `spawn` function's `address` parameter is now optional and defaults to `"127.0.0.1:0"`. This makes it easier to spawn a remote machine server with sensible defaults.
+
+  No breaking changes.
+
+  **New Behavior:**
+
+  - `spawn()` - Uses default address `"127.0.0.1:0"`
+  - `spawn("127.0.0.1:5000")` - Uses specified address
+  - `spawn(undefined, 5000)` - Uses default address with custom timeout
+
+- 6683739: Add `MAX_MCYCLE` constant (0xffffffffffffffffffn) for use as the default maximum cycle count. The `mcycleEnd` parameter of `run` is now optional and defaults to `MAX_MCYCLE`.
+
 ## 0.1.0
 
 ### Minor Changes
