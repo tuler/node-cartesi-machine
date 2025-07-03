@@ -1,5 +1,11 @@
 # @tuler/node-cartesi-machine
 
+## 0.1.0
+
+### Minor Changes
+
+- 06cfe86: binding for emulator 0.19.0 using FFI
+
 ## 0.0.8
 
 ### Patch Changes
