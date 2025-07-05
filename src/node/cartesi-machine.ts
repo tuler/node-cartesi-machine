@@ -695,9 +695,8 @@ export class NodeCartesiMachine {
     } {
         const cmd = [0];
         const reason = [0n];
-        const length = [0n];
-        const data = Buffer.alloc(2 * 1024 * 1024); // 2MB buffer
-        length[0] = BigInt(data.length);
+        const data = Buffer.allocUnsafe(2 * 1024 * 1024); // 2MB buffer
+        const length = [BigInt(data.length)];
 
         const result = cm_receive_cmio_request(
             this.machine,
