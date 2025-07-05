@@ -1,5 +1,13 @@
 # @tuler/node-cartesi-machine
 
+## 0.4.0
+
+### Minor Changes
+
+- f9ab696: Changed: The `CmioYieldReason` enum has been replaced with a `const` object to allow the use of `bigint` in all values. Update any code referencing `CmioYieldReason` to use the new object and expect `bigint` values for these fields.
+- b270e42: Changed: The `PmaConstant` enum has been replaced with a `const` object to allow the use of `bigint` for address values (`CmioRxBufferStart`, `CmioTxBufferStart`, and `RamStart`). Update any code referencing `PmaConstant` to use the new object and expect `bigint` values for these fields.
+- cdd1671: Improved method chaining for `RemoteCartesiMachine`: methods like `load`, `create`, `cloneEmpty`, and `store` now all return a `RemoteCartesiMachine` instance, enabling fluent chaining of these calls.
+
 ## 0.3.0
 
 ### Minor Changes
