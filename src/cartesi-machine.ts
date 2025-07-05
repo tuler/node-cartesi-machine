@@ -118,16 +118,16 @@ export enum CmioYieldCommand {
 }
 
 /// Yield reasons
-export enum CmioYieldReason {
-    AutomaticReasonProgress = 1, ///< Progress is available
-    AutomaticReasonTxOutput = 2, ///< Output is available in tx buffer
-    AutomaticReasonTxReport = 4, ///< Report is available in tx buffer
-    ManualReasonRxAccepted = 1, ///< Input in rx buffer was accepted
-    ManualReasonRxRejected = 2, ///< Input in rx buffer was rejected
-    ManualReasonTxException = 4, ///< Exception happened
-    ReasonAdvanceState = 0, ///< Input in rx buffer is an advance state
-    ReasonInspectState = 1, ///< Input in rx buffer is an inspect state
-}
+export const CmioYieldReason = {
+    AutomaticProgress: 1n, // Progress is available
+    AutomaticTxOutput: 2n, // Output is available in tx buffer
+    AutomaticTxReport: 4n, // Report is available in tx buffer
+    ManualRxAccepted: 1n, // Input in rx buffer was accepted
+    ManualRxRejected: 2n, // Input in rx buffer was rejected
+    ManualTxException: 4n, // Exception happened
+    AdvanceState: 0n, // Input in rx buffer is an advance state
+    InspectState: 1n, // Input in rx buffer is an inspect state
+} as const;
 
 /// Machine x, f, and control and status registers
 export enum Reg {
@@ -329,15 +329,15 @@ export interface CartesiMachine {
     resetUarch(): void;
     receiveCmioRequest(): {
         cmd: CmioYieldCommand;
-        reason: number;
+        reason: bigint;
         data: Buffer;
     };
-    sendCmioResponse(reason: number, data: Buffer): void;
+    sendCmioResponse(reason: bigint, data: Buffer): void;
     logStep(mcycleCount: bigint, logFilename: string): BreakReason;
     logStepUarch(logType: AccessLogType): AccessLog;
     logResetUarch(logType: AccessLogType): AccessLog;
     logSendCmioResponse(
-        reason: number,
+        reason: bigint,
         data: Buffer,
         logType: AccessLogType,
     ): string;
@@ -422,7 +422,7 @@ export function verifyResetUarch(
 }
 
 export function verifySendCmioResponse(
-    reason: number,
+    reason: bigint,
     data: Buffer,
     rootHashBefore: Buffer,
     log: AccessLog,

@@ -57,7 +57,7 @@ export interface CartesiMachine {
     logStepUarch(logType: AccessLogType): AccessLog;
     logResetUarch(logType: AccessLogType): AccessLog;
     logSendCmioResponse(
-        reason: number,
+        reason: bigint,
         data: Buffer,
         logType: AccessLogType,
     ): string;
@@ -81,10 +81,10 @@ export interface CartesiMachine {
     ): void;
 
     //// CMIO Operations
-    sendCmioResponse(reason: number, data: Buffer): void;
+    sendCmioResponse(reason: bigint, data: Buffer): void;
     receiveCmioRequest(): {
         cmd: CmioYieldCommand;
-        reason: number;
+        reason: bigint;
         data: Buffer;
     };
 }
@@ -351,7 +351,7 @@ Sends a cmio response and returns a log of state accesses.
 
 ```ts
 logSendCmioResponse(
-    reason: number,
+    reason: bigint,
     data: Buffer,
     logType: AccessLogType,
 ): string;
@@ -399,7 +399,7 @@ verifyResetUarch(
 Sends a cmio response. Should only be called as a response to cmio requests with manual yield command.
 
 ```ts
-sendCmioResponse(reason: number, data: Buffer): void;
+sendCmioResponse(reason: bigint, data: Buffer): void;
 ```
 
 ## receiveCmioRequest
@@ -409,7 +409,7 @@ Receives a cmio request, including the yield command, reason, and data.
 ```ts
 receiveCmioRequest(): {
     cmd: CmioYieldCommand;
-    reason: number;
+    reason: bigint;
     data: Buffer;
 };
 ```

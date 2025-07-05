@@ -642,8 +642,8 @@ export class NodeCartesiMachine {
     /**
      * Translates a virtual address to physical address
      */
-    translateVirtualAddress<T extends bigint | number>(vaddr: T): T {
-        const paddr = [0 as T];
+    translateVirtualAddress(vaddr: bigint): bigint {
+        const paddr = [0n];
         const result = cm_translate_virtual_address(this.machine, vaddr, paddr);
         if (result !== ErrorCode.Ok) {
             throw MachineError.fromCode(result);
@@ -690,11 +690,11 @@ export class NodeCartesiMachine {
      */
     receiveCmioRequest(): {
         cmd: CmioYieldCommand;
-        reason: number;
+        reason: bigint;
         data: Buffer;
     } {
         const cmd = [0];
-        const reason = [0];
+        const reason = [0n];
         const length = [0n];
         const data = Buffer.alloc(2 * 1024 * 1024); // 2MB buffer
         length[0] = BigInt(data.length);
@@ -720,7 +720,7 @@ export class NodeCartesiMachine {
     /**
      * Sends a CMIO response
      */
-    sendCmioResponse(reason: number, data: Buffer): void {
+    sendCmioResponse(reason: bigint, data: Buffer): void {
         const result = cm_send_cmio_response(
             this.machine,
             reason,
@@ -785,7 +785,7 @@ export class NodeCartesiMachine {
      * Logs CMIO response
      */
     logSendCmioResponse(
-        reason: number,
+        reason: bigint,
         data: Buffer,
         logType: AccessLogType,
     ): string {
@@ -936,7 +936,7 @@ export class NodeCartesiMachine {
      * Verifies CMIO response
      */
     verifySendCmioResponse(
-        reason: number,
+        reason: bigint,
         data: Buffer,
         rootHashBefore: Buffer,
         log: AccessLog,
@@ -960,7 +960,7 @@ export class NodeCartesiMachine {
      * Verifies CMIO response
      */
     static verifySendCmioResponse(
-        reason: number,
+        reason: bigint,
         data: Buffer,
         rootHashBefore: Buffer,
         log: AccessLog,
