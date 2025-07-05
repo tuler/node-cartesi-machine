@@ -20,6 +20,10 @@ export interface RemoteCartesiMachine extends CartesiMachine {
     delayNextRequest(ms: number): void;
     getBoundAddress(): string | null;
     fork(): RemoteCartesiMachine;
+    load(dir: string, runtimeConfig?: MachineRuntimeConfig): RemoteCartesiMachine;
+    create(config: MachineConfig, runtimeConfig?: MachineRuntimeConfig): RemoteCartesiMachine;
+    cloneEmpty(): RemoteCartesiMachine;
+    store(dir: string): RemoteCartesiMachine;
 }
 ```
 
@@ -125,4 +129,36 @@ Forks the remote machine server, creating a new server process and machine objec
 
 ```ts
 fork(): RemoteCartesiMachine;
+```
+
+## load
+
+Loads a remote machine instance from a previously stored directory, with optional runtime configuration. Returns a `RemoteCartesiMachine` instance, allowing method chaining. Semantics are the same as for [CartesiMachine.load](/api/cartesi-machine#load).
+
+```ts
+load(dir: string, runtimeConfig?: MachineRuntimeConfig): RemoteCartesiMachine
+```
+
+## create
+
+Creates a new remote machine instance from the given configuration and optional runtime configuration. Returns a `RemoteCartesiMachine` instance, allowing method chaining. Semantics are the same as for [CartesiMachine.create](/api/cartesi-machine#create).
+
+```ts
+create(config: MachineConfig, runtimeConfig?: MachineRuntimeConfig): RemoteCartesiMachine
+```
+
+## cloneEmpty
+
+Clones an empty remote machine object from an existing one. Returns a `RemoteCartesiMachine` instance, allowing method chaining. Semantics are the same as for [CartesiMachine.cloneEmpty](/api/cartesi-machine#cloneempty).
+
+```ts
+cloneEmpty(): RemoteCartesiMachine
+```
+
+## store
+
+Stores the current remote machine instance to a directory, serializing its entire state. Returns a `RemoteCartesiMachine` instance, allowing method chaining. Semantics are the same as for [CartesiMachine.store](/api/cartesi-machine#store).
+
+```ts
+store(dir: string): RemoteCartesiMachine
 ```

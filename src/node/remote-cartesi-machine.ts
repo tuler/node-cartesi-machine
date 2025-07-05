@@ -1,5 +1,6 @@
 import { ErrorCode, MachineError } from "../cartesi-machine";
 import type { CleanupCall } from "../remote-cartesi-machine";
+import type { MachineConfig, MachineRuntimeConfig } from "../types";
 import { NodeCartesiMachine } from "./cartesi-machine";
 import { loadLibrary } from "./lib-loader";
 
@@ -224,5 +225,31 @@ export class NodeRemoteCartesiMachine extends NodeCartesiMachine {
 
     getServerPid(): number | null {
         return this.serverPid;
+    }
+
+    load(
+        dir: string,
+        runtimeConfig?: MachineRuntimeConfig,
+    ): NodeRemoteCartesiMachine {
+        super.load(dir, runtimeConfig);
+        return this;
+    }
+
+    cloneEmpty(): NodeRemoteCartesiMachine {
+        super.cloneEmpty();
+        return this;
+    }
+
+    create(
+        config: MachineConfig,
+        runtimeConfig?: MachineRuntimeConfig,
+    ): NodeRemoteCartesiMachine {
+        super.create(config, runtimeConfig);
+        return this;
+    }
+
+    store(dir: string): NodeRemoteCartesiMachine {
+        super.store(dir);
+        return this;
     }
 }

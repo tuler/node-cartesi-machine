@@ -1,5 +1,6 @@
 import type { CartesiMachine } from "./cartesi-machine";
 import { NodeRemoteCartesiMachine } from "./node/remote-cartesi-machine";
+import type { MachineConfig, MachineRuntimeConfig } from "./types";
 
 // -----------------------------------------------------------------------------
 // Type definitions
@@ -29,6 +30,16 @@ export interface RemoteCartesiMachine extends CartesiMachine {
     delayNextRequest(ms: number): void;
     getBoundAddress(): string | null;
     fork(): RemoteCartesiMachine;
+    load(
+        dir: string,
+        runtimeConfig?: MachineRuntimeConfig,
+    ): RemoteCartesiMachine;
+    cloneEmpty(): RemoteCartesiMachine;
+    create(
+        config: MachineConfig,
+        runtimeConfig?: MachineRuntimeConfig,
+    ): RemoteCartesiMachine;
+    store(dir: string): RemoteCartesiMachine;
 }
 
 // -----------------------------------------------------------------------------
