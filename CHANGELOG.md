@@ -1,5 +1,11 @@
 # @tuler/node-cartesi-machine
 
+## 0.4.1
+
+### Patch Changes
+
+- 068b5bc: Fix receiveCmioRequest
+
 ## 0.4.0
 
 ### Minor Changes
