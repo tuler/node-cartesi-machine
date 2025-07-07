@@ -1,5 +1,11 @@
 # @tuler/node-cartesi-machine
 
+## 0.5.0
+
+### Minor Changes
+
+- cc508be: Usage of CmioYieldReason enum (number) instead of number or bigint
+
 ## 0.4.1
 
 ### Patch Changes
