@@ -118,16 +118,16 @@ export enum CmioYieldCommand {
 }
 
 /// Yield reasons
-export const CmioYieldReason = {
-    AutomaticProgress: 1n, // Progress is available
-    AutomaticTxOutput: 2n, // Output is available in tx buffer
-    AutomaticTxReport: 4n, // Report is available in tx buffer
-    ManualRxAccepted: 1n, // Input in rx buffer was accepted
-    ManualRxRejected: 2n, // Input in rx buffer was rejected
-    ManualTxException: 4n, // Exception happened
-    AdvanceState: 0n, // Input in rx buffer is an advance state
-    InspectState: 1n, // Input in rx buffer is an inspect state
-} as const;
+export enum CmioYieldReason {
+    AutomaticProgress = 1, ///< Progress is available
+    AutomaticTxOutput = 2, ///< Output is available in tx buffer
+    AutomaticTxReport = 4, ///< Report is available in tx buffer
+    ManualRxAccepted = 1, ///< Input in rx buffer was accepted
+    ManualRxRejected = 2, ///< Input in rx buffer was rejected
+    ManualTxException = 4, ///< Exception happened
+    AdvanceState = 0, ///< Input in rx buffer is an advance state
+    InspectState = 1, ///< Input in rx buffer is an inspect state
+}
 
 /// Machine x, f, and control and status registers
 export enum Reg {
@@ -329,15 +329,15 @@ export interface CartesiMachine {
     resetUarch(): void;
     receiveCmioRequest(): {
         cmd: CmioYieldCommand;
-        reason: bigint;
+        reason: CmioYieldReason;
         data: Buffer;
     };
-    sendCmioResponse(reason: bigint, data: Buffer): void;
+    sendCmioResponse(reason: CmioYieldReason, data: Buffer): void;
     logStep(mcycleCount: bigint, logFilename: string): BreakReason;
     logStepUarch(logType: AccessLogType): AccessLog;
     logResetUarch(logType: AccessLogType): AccessLog;
     logSendCmioResponse(
-        reason: bigint,
+        reason: CmioYieldReason,
         data: Buffer,
         logType: AccessLogType,
     ): string;
@@ -422,7 +422,7 @@ export function verifyResetUarch(
 }
 
 export function verifySendCmioResponse(
-    reason: bigint,
+    reason: CmioYieldReason,
     data: Buffer,
     rootHashBefore: Buffer,
     log: AccessLog,

@@ -3,6 +3,7 @@ import type {
     BreakReason,
     CartesiMachine,
     CmioYieldCommand,
+    CmioYieldReason,
     Reg,
     UarchBreakReason,
 } from "../cartesi-machine";
@@ -690,11 +691,11 @@ export class NodeCartesiMachine {
      */
     receiveCmioRequest(): {
         cmd: CmioYieldCommand;
-        reason: bigint;
+        reason: CmioYieldReason;
         data: Buffer;
     } {
         const cmd = [0];
-        const reason = [0n];
+        const reason = [0];
         const data = Buffer.allocUnsafe(2 * 1024 * 1024); // 2MB buffer
         const length = [data.length];
 
@@ -719,7 +720,7 @@ export class NodeCartesiMachine {
     /**
      * Sends a CMIO response
      */
-    sendCmioResponse(reason: bigint, data: Buffer): void {
+    sendCmioResponse(reason: CmioYieldReason, data: Buffer): void {
         const result = cm_send_cmio_response(
             this.machine,
             reason,
@@ -784,7 +785,7 @@ export class NodeCartesiMachine {
      * Logs CMIO response
      */
     logSendCmioResponse(
-        reason: bigint,
+        reason: CmioYieldReason,
         data: Buffer,
         logType: AccessLogType,
     ): string {
@@ -935,7 +936,7 @@ export class NodeCartesiMachine {
      * Verifies CMIO response
      */
     verifySendCmioResponse(
-        reason: bigint,
+        reason: CmioYieldReason,
         data: Buffer,
         rootHashBefore: Buffer,
         log: AccessLog,
@@ -959,7 +960,7 @@ export class NodeCartesiMachine {
      * Verifies CMIO response
      */
     static verifySendCmioResponse(
-        reason: bigint,
+        reason: CmioYieldReason,
         data: Buffer,
         rootHashBefore: Buffer,
         log: AccessLog,
