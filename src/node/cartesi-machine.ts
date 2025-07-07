@@ -183,7 +183,7 @@ const cm_reset_uarch = lib.func("int cm_reset_uarch(cm_machine* m)");
 
 /// Receives a cmio request
 const cm_receive_cmio_request = lib.func(
-    "int cm_receive_cmio_request(const cm_machine* m, _Out_ uint8_t* cmd, _Out_ uint16_t* reason, _Out_ uint8_t* data, _Out_ uint64_t* length)",
+    "int cm_receive_cmio_request(const cm_machine* m, _Out_ uint8_t* cmd, _Out_ uint16_t* reason, _Inout_ uint8_t* data, _Inout_ uint64_t* length)",
 );
 
 /// Sends a cmio response
@@ -696,7 +696,7 @@ export class NodeCartesiMachine {
         const cmd = [0];
         const reason = [0n];
         const data = Buffer.allocUnsafe(2 * 1024 * 1024); // 2MB buffer
-        const length = [BigInt(data.length)];
+        const length = [data.length];
 
         const result = cm_receive_cmio_request(
             this.machine,
@@ -712,7 +712,7 @@ export class NodeCartesiMachine {
         return {
             cmd: cmd[0],
             reason: reason[0],
-            data: data.subarray(0, Number(length[0])),
+            data: data.subarray(0, length[0]),
         };
     }
 
