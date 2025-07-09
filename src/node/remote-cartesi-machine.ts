@@ -6,6 +6,7 @@ import { loadLibrary } from "./lib-loader";
 
 // Load the Cartesi Machine JSON-RPC library
 const lib = loadLibrary("cartesi_jsonrpc");
+const libc = loadLibrary("c");
 
 const cm_jsonrpc_spawn_server = lib.func(
     "int cm_jsonrpc_spawn_server(const char *address, int64_t spawn_timeout_ms, _Out_ cm_machine **new_m, _Out_ const char **bound_address, _Out_ uint32_t *pid)",
@@ -47,6 +48,39 @@ const cm_jsonrpc_delay_next_request = lib.func(
     "int cm_jsonrpc_delay_next_request(cm_machine *m, uint64_t ms)",
 );
 
+const fcntl = libc.func("int fcntl(int fd, int cmd, int arg)");
+
+const F_GETFD = 1; // Get file descriptor flags
+const F_SETFD = 2; // Set file descriptor flags
+const FD_CLOEXEC = 1; // Close-on-exec flag
+
+function clearCloexec(fd: number): number {
+    // Get current flags
+    const flags = fcntl(fd, F_GETFD, 0);
+    if (flags === -1) {
+        throw new Error(`Failed to get flags for fd ${fd}`);
+    }
+
+    // Clear the FD_CLOEXEC bit
+    const newFlags = flags & ~FD_CLOEXEC;
+
+    // Set the new flags
+    const result = fcntl(fd, F_SETFD, newFlags);
+    if (result === -1) {
+        throw new Error(`Failed to set flags for fd ${fd}`);
+    }
+
+    return flags;
+}
+
+function setCloexec(fd: number, value: number): void {
+    // Set the flags value
+    const result = fcntl(fd, F_SETFD, value);
+    if (result === -1) {
+        throw new Error(`Failed to set flags for fd ${fd}`);
+    }
+}
+
 export class NodeRemoteCartesiMachine extends NodeCartesiMachine {
     private serverAddress: string | null = null;
     private serverPid: number | null = null;
@@ -55,28 +89,34 @@ export class NodeRemoteCartesiMachine extends NodeCartesiMachine {
         address: string = "127.0.0.1:0",
         spawnTimeoutMs: number = -1,
     ): NodeRemoteCartesiMachine {
-        const newMachinePtr: [any] = [null];
-        const boundAddressPtr: [string | null] = [null];
-        const pidPtr: [number | null] = [null];
-        const result = cm_jsonrpc_spawn_server(
-            address,
-            spawnTimeoutMs,
-            newMachinePtr,
-            boundAddressPtr,
-            pidPtr,
-        );
-        if (result !== ErrorCode.Ok) {
-            throw MachineError.fromCode(result);
-        }
-        if (boundAddressPtr[0] === null || pidPtr[0] === null) {
-            throw new Error(
-                "Failed to get output parameters from spawn server",
+        // Disable close-on-exec for stdout
+        const flags = clearCloexec(1);
+        try {
+            const newMachinePtr: [any] = [null];
+            const boundAddressPtr: [string | null] = [null];
+            const pidPtr: [number | null] = [null];
+            const result = cm_jsonrpc_spawn_server(
+                address,
+                spawnTimeoutMs,
+                newMachinePtr,
+                boundAddressPtr,
+                pidPtr,
             );
+            if (result !== ErrorCode.Ok) {
+                throw MachineError.fromCode(result);
+            }
+            if (boundAddressPtr[0] === null || pidPtr[0] === null) {
+                throw new Error(
+                    "Failed to get output parameters from spawn server",
+                );
+            }
+            const instance = new NodeRemoteCartesiMachine(newMachinePtr[0]);
+            instance.serverAddress = boundAddressPtr[0];
+            instance.serverPid = pidPtr[0];
+            return instance;
+        } finally {
+            setCloexec(1, flags);
         }
-        const instance = new NodeRemoteCartesiMachine(newMachinePtr[0]);
-        instance.serverAddress = boundAddressPtr[0];
-        instance.serverPid = pidPtr[0];
-        return instance;
     }
 
     static connect(
