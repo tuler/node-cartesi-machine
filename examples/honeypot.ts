@@ -1,5 +1,6 @@
 import {
     BreakReason,
+    CleanupCall,
     CmioYieldReason,
     spawn,
 } from "@tuler/node-cartesi-machine";
@@ -57,7 +58,7 @@ if (!fs.existsSync(snapshotPath)) {
 }
 
 // load honeypot mainnet machine
-const machine = spawn().load(snapshotPath);
+const machine = spawn().setCleanupCall(CleanupCall.Shutdown).load(snapshotPath);
 
 // send deposit
 machine.sendCmioResponse(
@@ -126,3 +127,5 @@ while (breakReason !== BreakReason.YieldedManually) {
     breakReason = machine.run();
 }
 console.log(machine.receiveCmioRequest());
+
+machine.shutdown();

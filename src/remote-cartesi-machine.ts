@@ -24,7 +24,7 @@ export interface RemoteCartesiMachine extends CartesiMachine {
     emancipate(): void;
     setTimeout(ms: number): void;
     getTimeout(): number;
-    setCleanupCall(call: CleanupCall): void;
+    setCleanupCall(call: CleanupCall): RemoteCartesiMachine;
     getCleanupCall(): CleanupCall;
     getServerVersion(): string;
     delayNextRequest(ms: number): void;
