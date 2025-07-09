@@ -221,11 +221,12 @@ export class NodeRemoteCartesiMachine extends NodeCartesiMachine {
         return msPtr[0];
     }
 
-    setCleanupCall(call: CleanupCall): void {
+    setCleanupCall(call: CleanupCall): NodeRemoteCartesiMachine {
         const result = cm_jsonrpc_set_cleanup_call(this.machine, call);
         if (result !== ErrorCode.Ok) {
             throw MachineError.fromCode(result);
         }
+        return this;
     }
 
     getCleanupCall(): CleanupCall {
