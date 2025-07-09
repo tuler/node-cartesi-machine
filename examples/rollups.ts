@@ -1,8 +1,7 @@
 import {
-    BreakReason,
-    CleanupCall,
-    CmioYieldReason,
-    spawn,
+    rollups,
+    RollupsFatalError,
+    RollupsInputRejectedError,
 } from "@tuler/node-cartesi-machine";
 import fs from "node:fs";
 import { encodePacked, parseUnits } from "viem";
@@ -16,8 +15,6 @@ const appContract = "0x4c1E74EF88a75C24e49eddD9f70D82A94D19251c";
 const erc20PortalAddress = "0xc700D6aDd016eECd59d989C028214Eaa0fCC0051";
 const withdrawAddress = "0x60247492F1538Ed4520e61aE41ca2A8447592Ff5";
 const tokenAddress = "0x491604c0fdf08347dd1fa4ee062a822a5dd06b5d";
-
-let breakReason: BreakReason;
 
 // check if file exists
 const snapshotPath = `snapshots/${templateHash}`;
@@ -33,38 +30,36 @@ if (!fs.existsSync(snapshotPath)) {
 const sequencer = new Sequencer(1n, appContract);
 
 // load honeypot mainnet machine
-const machine = spawn().setCleanupCall(CleanupCall.Shutdown).load(snapshotPath);
+const machine = rollups(snapshotPath);
 
 // send deposit
-machine.sendCmioResponse(
-    CmioYieldReason.AdvanceState,
-    sequencer.mine(
-        erc20PortalAddress,
-        encodePacked(
-            ["address", "address", "uint256", "bytes"],
-            [tokenAddress, withdrawAddress, parseUnits("1", 18), "0x"],
-        ),
+const deposit = sequencer.mine(
+    erc20PortalAddress,
+    encodePacked(
+        ["address", "address", "uint256", "bytes"],
+        [tokenAddress, withdrawAddress, parseUnits("1", 18), "0x"],
     ),
 );
 console.log(`Deposit`);
-breakReason = machine.run();
-while (breakReason !== BreakReason.YieldedManually) {
-    console.log("\t", machine.receiveCmioRequest());
-    breakReason = machine.run();
+try {
+    console.log(machine.advance(deposit));
+} catch (err: unknown) {
+    if (err instanceof RollupsInputRejectedError) {
+        console.log("input rejected");
+    } else if (err instanceof RollupsFatalError) {
+        console.log("input raised exception", err.message);
+    }
 }
-console.log(machine.receiveCmioRequest());
 
 // send withdraw request
-machine.sendCmioResponse(
-    CmioYieldReason.AdvanceState,
-    sequencer.mine(withdrawAddress, "0x"),
-);
+const withdrawRequest = sequencer.mine(withdrawAddress, "0x");
 console.log(`Withdraw request`);
-breakReason = machine.run();
-while (breakReason !== BreakReason.YieldedManually) {
-    console.log("\t", machine.receiveCmioRequest());
-    breakReason = machine.run();
+try {
+    console.log(machine.advance(withdrawRequest));
+} catch (err: unknown) {
+    if (err instanceof RollupsInputRejectedError) {
+        console.log("input rejected");
+    } else if (err instanceof RollupsFatalError) {
+        console.log("input raised exception", err.message);
+    }
 }
-console.log(machine.receiveCmioRequest());
-
-machine.shutdown();
