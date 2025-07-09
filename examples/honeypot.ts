@@ -1,7 +1,7 @@
 import {
     BreakReason,
     CmioYieldReason,
-    load,
+    spawn,
 } from "@tuler/node-cartesi-machine";
 import fs from "node:fs";
 import { encodeFunctionData, encodePacked, hexToBytes, parseUnits } from "viem";
@@ -57,7 +57,7 @@ if (!fs.existsSync(snapshotPath)) {
 }
 
 // load honeypot mainnet machine
-const machine = load(snapshotPath);
+const machine = spawn().load(snapshotPath);
 
 // send deposit
 machine.sendCmioResponse(
