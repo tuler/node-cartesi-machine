@@ -1,0 +1,37 @@
+# rollups
+
+The `rollups` function is the main entry point for creating a `RollupsMachine` instance. It supports two forms:
+
+---
+
+## From a Remote Machine
+
+```ts
+const rollup = rollups(machine: RemoteCartesiMachine, options?: { noRollback?: boolean }): RollupsMachine;
+```
+
+- `machine`: An instance of `RemoteCartesiMachine`.
+- `options.noRollback` (default: `false`): If true, disables rollback/forking for performance, but makes state changes permanent.
+
+---
+
+## From a Store Directory
+
+```ts
+const rollup = rollups(dir: string, options?: {
+    noRollback?: boolean;
+    runtimeConfig?: MachineRuntimeConfig;
+    address?: string;
+    timeout?: number;
+}): RollupsMachine;
+```
+
+- `dir`: Path to the store directory.
+- `options.runtimeConfig`: Runtime configuration for the machine.
+- `options.address`: Address for the remote machine server.
+- `options.timeout`: Timeout for the remote machine server.
+- `options.noRollback`: See above.
+
+---
+
+For the full interface and available methods, see [RollupsMachine](/api/rollups-machine).
