@@ -44,9 +44,7 @@ const machine = create({
 
 ## Running a machine
 
-The next step of this simple example is to run the machine until it halts.
-The value `0xffffffffffffffffffn` is used as an "infinite" cycles amount.
-That means the machine will run until it yields or until it halts.
+The next step of this simple example is to run the machine until it yields or halts.
 
 ```ts twoslash filename="run-hello-world.ts"
 // @noErrors
@@ -126,7 +124,7 @@ const hash = machine.getRootHash(); // [!code focus]
 console.log(hash); // [!code focus]
 ```
 
-The complete `CartesiMachine` API is available in the API section.
+The complete [CartesiMachine](/api/cartesi-machine) API is available in the API section.
 
 ## Memory Management
 

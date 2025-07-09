@@ -27,6 +27,10 @@ export default defineConfig({
             link: "/remote",
         },
         {
+            text: "Rollups Machine",
+            link: "/rollups",
+        },
+        {
             text: "Error Handling",
             link: "/error-handling",
         },
@@ -54,12 +58,20 @@ export default defineConfig({
                     link: "/api/connect",
                 },
                 {
+                    text: "rollups",
+                    link: "/api/rollups",
+                },
+                {
                     text: "CartesiMachine",
                     link: "/api/cartesi-machine",
                 },
                 {
                     text: "RemoteCartesiMachine",
                     link: "/api/remote-cartesi-machine",
+                },
+                {
+                    text: "RollupsMachine",
+                    link: "/api/rollups-machine",
                 },
             ],
         },
