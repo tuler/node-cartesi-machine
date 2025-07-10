@@ -1,5 +1,16 @@
 # @tuler/node-cartesi-machine
 
+## 0.6.0
+
+### Minor Changes
+
+- e6fe06e: Rollups API
+- 7848203: allow setCleanupCall chaining
+
+### Patch Changes
+
+- 861df4f: Fixing stdout of remote machines
+
 ## 0.5.0
 
 ### Minor Changes
