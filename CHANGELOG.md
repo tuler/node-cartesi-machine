@@ -1,5 +1,11 @@
 # @tuler/node-cartesi-machine
 
+## 0.7.0
+
+### Minor Changes
+
+- 8d1fc4e: Rollups API for local machines (test scenario)
+
 ## 0.6.0
 
 ### Minor Changes
