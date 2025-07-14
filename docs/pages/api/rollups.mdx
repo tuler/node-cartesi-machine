@@ -1,8 +1,6 @@
 # rollups
 
-The `rollups` function is the main entry point for creating a `RollupsMachine` instance. It supports two forms:
-
----
+The `rollups` function is the main entry point for creating a [RollupsMachine](/api/rollups-machine) instance. It supports three forms:
 
 ## From a Remote Machine
 
@@ -12,8 +10,6 @@ const rollup = rollups(machine: RemoteCartesiMachine, options?: { noRollback?: b
 
 - `machine`: An instance of `RemoteCartesiMachine`.
 - `options.noRollback` (default: `false`): If true, disables rollback/forking for performance, but makes state changes permanent.
-
----
 
 ## From a Store Directory
 
@@ -32,6 +28,25 @@ const rollup = rollups(dir: string, options?: {
 - `options.timeout`: Timeout for the remote machine server.
 - `options.noRollback`: See above.
 
----
+## From a Local Machine
+
+You can also create a rollups machine from a local CartesiMachine instance.
+
+:::warning
+When using a local machine, rejected inputs do not trigger rollback, so this mode should only be used for test scenarios.
+:::
+
+```ts
+import { rollups, create } from "@tuler/node-cartesi-machine";
+
+// create a local Cartesi machine
+const config = { ram: { length: 1048576 } };
+const localMachine = create(config);
+
+// create a rollups machine from a local machine (no rollback on rejected inputs)
+const machine = rollups(localMachine);
+```
+
+This approach is useful for unit tests or simple experiments, but is not recommended for production or integration scenarios, as rejected inputs will leave the machine in an invalid state.
 
 For the full interface and available methods, see [RollupsMachine](/api/rollups-machine).

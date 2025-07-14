@@ -1,4 +1,9 @@
-import { BreakReason, CmioYieldReason } from "./cartesi-machine";
+import {
+    BreakReason,
+    CmioYieldReason,
+    type CartesiMachine,
+} from "./cartesi-machine";
+import { NodeRemoteCartesiMachine } from "./node/remote-cartesi-machine";
 import { spawn, type RemoteCartesiMachine } from "./remote-cartesi-machine";
 import type { MachineRuntimeConfig } from "./types";
 
@@ -39,6 +44,15 @@ export interface RollupsMachine {
 }
 
 /**
+ * Create a rollups machine from a local machine.
+ * @param machine - The local machine.
+ * @returns A rollups machine.
+ */
+function rollupsFromLocal(machine: CartesiMachine): RollupsMachine {
+    return new LocalRollupsMachineImpl(machine);
+}
+
+/**
  * Create a rollups machine from a remote machine.
  * @param machine - The remote machine.
  * @returns A rollups machine.
@@ -47,7 +61,7 @@ function rollupsFromRemote(
     machine: RemoteCartesiMachine,
     options?: { noRollback?: boolean },
 ): RollupsMachine {
-    return new RollupsMachineImpl(machine, options?.noRollback ?? false);
+    return new RemoteRollupsMachineImpl(machine, options?.noRollback ?? false);
 }
 
 const DEFAULT_ADDRESS = "127.0.0.1:0";
@@ -93,6 +107,13 @@ export function rollups(
 ): RollupsMachine;
 
 /**
+ * Create a rollups machine from a local machine.
+ * @param machine - The local machine.
+ * @returns A rollups machine.
+ */
+export function rollups(machine: CartesiMachine): RollupsMachine;
+
+/**
  * Create a rollups machine from a store directory.
  * @param dir - The directory containing the store.
  * @param runtimeConfig - The runtime configuration.
@@ -112,7 +133,7 @@ export function rollups(
 ): RollupsMachine;
 
 export function rollups(
-    arg1: RemoteCartesiMachine | string,
+    arg1: RemoteCartesiMachine | CartesiMachine | string,
     options?: {
         noRollback?: boolean;
         runtimeConfig?: MachineRuntimeConfig;
@@ -128,63 +149,56 @@ export function rollups(
 
     if (typeof arg1 === "string") {
         return rollupsFromStore(arg1, options);
-    } else {
+    } else if (arg1 instanceof NodeRemoteCartesiMachine) {
         return rollupsFromRemote(arg1, options);
+    } else {
+        return rollupsFromLocal(arg1);
     }
 }
 
-class RollupsMachineImpl implements RollupsMachine {
-    private machine: RemoteCartesiMachine;
-    private noRollback: boolean;
+abstract class RollupsMachineImpl implements RollupsMachine {
+    abstract shutdown(): void;
+    abstract store(dir: string): RollupsMachine;
 
-    constructor(machine: RemoteCartesiMachine, noRollback: boolean = false) {
-        this.machine = machine;
-        this.noRollback = noRollback;
-    }
+    abstract startTransaction(): CartesiMachine;
+    abstract commitTransaction(machine: CartesiMachine): void;
+    abstract rollbackTransaction(machine: CartesiMachine): void;
 
     *advance(input: Buffer): IterableIterator<AdvanceYield> {
-        // start by creating a backup fork, in case input gets rejected
-        const fork = this.noRollback ? undefined : this.machine.fork();
+        // start a machine "transaction"
+        const machine = this.startTransaction();
 
         // write input
-        this.machine.sendCmioResponse(CmioYieldReason.AdvanceState, input);
+        machine.sendCmioResponse(CmioYieldReason.AdvanceState, input);
 
         while (true) {
             // run machine until it yields or halts
-            const breakReason = this.machine.run();
+            const breakReason = machine.run();
 
             switch (breakReason) {
                 case BreakReason.YieldedManually: {
-                    const { reason, data } = this.machine.receiveCmioRequest();
+                    const { reason, data } = machine.receiveCmioRequest();
                     switch (reason) {
                         case CmioYieldReason.ManualRxAccepted: {
                             // input was accepted
                             // shutdown the backup fork if it exists
-                            fork?.shutdown();
+                            this.commitTransaction(machine);
                             return;
                         }
                         case CmioYieldReason.ManualRxRejected: {
                             // input was rejected
-                            if (fork) {
-                                // shutdown the machine and replace by the fork
-                                this.machine.shutdown();
-                                this.machine = fork;
-                            }
-
+                            this.rollbackTransaction(machine);
                             throw new RollupsInputRejectedError();
                         }
                         case CmioYieldReason.ManualTxException: {
                             // exception
-                            if (fork) {
-                                // shutdown the current machine, and replace by the preserved fork
-                                this.machine.shutdown();
-                                this.machine = fork;
-                            }
+                            this.rollbackTransaction(machine);
 
                             const description = data.toString("utf-8"); // XXX: is this correct?
                             throw new RollupsFatalError(description);
                         }
                         default: {
+                            this.rollbackTransaction(machine);
                             throw new RollupsFatalError(
                                 `Unexpected yield reason: ${reason}`,
                             );
@@ -192,7 +206,7 @@ class RollupsMachineImpl implements RollupsMachine {
                     }
                 }
                 case BreakReason.YieldedAutomatically: {
-                    const { reason, data } = this.machine.receiveCmioRequest();
+                    const { reason, data } = machine.receiveCmioRequest();
                     switch (reason) {
                         case CmioYieldReason.AutomaticProgress: {
                             try {
@@ -218,6 +232,7 @@ class RollupsMachineImpl implements RollupsMachine {
                     continue; // run again
                 }
                 default: {
+                    this.rollbackTransaction(machine);
                     throw new RollupsFatalError(
                         `Unexpected break reason: ${breakReason}`,
                     );
@@ -227,9 +242,7 @@ class RollupsMachineImpl implements RollupsMachine {
     }
 
     *inspect(query: Buffer): IterableIterator<Buffer> {
-        // depending on the noRollback flag, we either use the current machine or a fork
-        // default behavior is to create a fork, to preserve the state of the machine
-        const machine = this.noRollback ? this.machine : this.machine.fork();
+        const machine = this.startTransaction();
 
         // write query
         machine.sendCmioResponse(CmioYieldReason.InspectState, query);
@@ -244,31 +257,22 @@ class RollupsMachineImpl implements RollupsMachine {
                     switch (reason) {
                         case CmioYieldReason.ManualRxAccepted: {
                             // input was accepted
-                            if (!this.noRollback) {
-                                // shutdown the fork and return gracefully
-                                machine.shutdown();
-                            }
+                            this.rollbackTransaction(machine);
                             return;
                         }
                         case CmioYieldReason.ManualRxRejected: {
                             // input was rejected
-                            if (!this.noRollback) {
-                                // shutdown the fork and throw
-                                machine.shutdown();
-                            }
+                            this.rollbackTransaction(machine);
                             throw new RollupsInputRejectedError();
                         }
                         case CmioYieldReason.ManualTxException: {
                             // exception
-                            if (!this.noRollback) {
-                                // shutdown the fork, and throw
-                                machine.shutdown();
-                            }
-
+                            this.rollbackTransaction(machine);
                             const description = data.toString("utf-8"); // XXX: is this correct?
                             throw new RollupsFatalError(description);
                         }
                         default: {
+                            this.rollbackTransaction(machine);
                             throw new RollupsFatalError(
                                 `Unexpected yield reason: ${reason}`,
                             );
@@ -295,6 +299,7 @@ class RollupsMachineImpl implements RollupsMachine {
                     continue; // run again
                 }
                 default: {
+                    this.rollbackTransaction(machine);
                     throw new RollupsFatalError(
                         `Unexpected break reason: ${breakReason}`,
                     );
@@ -302,9 +307,80 @@ class RollupsMachineImpl implements RollupsMachine {
             }
         }
     }
+}
+
+class RemoteRollupsMachineImpl extends RollupsMachineImpl {
+    private machine: RemoteCartesiMachine;
+    private noRollback: boolean;
+
+    constructor(machine: RemoteCartesiMachine, noRollback: boolean = false) {
+        super();
+        this.machine = machine;
+        this.noRollback = noRollback;
+    }
+
+    startTransaction(): CartesiMachine {
+        if (this.noRollback) {
+            // do not fork
+            return this.machine;
+        } else {
+            return this.machine.fork();
+        }
+    }
+
+    commitTransaction(machine: CartesiMachine): void {
+        if (this.noRollback) {
+            // do nothing
+        } else {
+            // shut down current machine
+            this.machine.shutdown();
+
+            // replace by fork
+            this.machine = machine as RemoteCartesiMachine;
+        }
+    }
+
+    rollbackTransaction(machine: CartesiMachine): void {
+        if (this.noRollback) {
+            // do nothing
+        } else {
+            // shutdown fork
+            (machine as RemoteCartesiMachine).shutdown();
+        }
+    }
 
     shutdown(): void {
         this.machine.shutdown();
+    }
+
+    store(dir: string): RollupsMachine {
+        this.machine.store(dir);
+        return this;
+    }
+}
+
+class LocalRollupsMachineImpl extends RollupsMachineImpl {
+    private machine: CartesiMachine;
+
+    constructor(machine: CartesiMachine) {
+        super();
+        this.machine = machine;
+    }
+
+    startTransaction(): CartesiMachine {
+        return this.machine;
+    }
+
+    commitTransaction(machine: CartesiMachine): void {
+        this.machine = machine;
+    }
+
+    rollbackTransaction(machine: CartesiMachine): void {
+        this.machine = machine;
+    }
+
+    shutdown(): void {
+        // no-op
     }
 
     store(dir: string): RollupsMachine {
