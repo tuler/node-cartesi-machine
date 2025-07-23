@@ -1,5 +1,11 @@
 # @tuler/node-cartesi-machine
 
+## 0.8.0
+
+### Minor Changes
+
+- 6d6f5c5: Rollups collect API
+
 ## 0.7.0
 
 ### Minor Changes
