@@ -36,9 +36,19 @@ export type AdvanceYield =
     | { type: "report"; data: Buffer }
     | { type: "progress"; data: number };
 
+export type AdvanceReturn = Buffer;
+
+export type AdvanceResult = {
+    outputs: Buffer[];
+    reports: Buffer[];
+    outputsMerkleRoot: Buffer;
+};
+
 export interface RollupsMachine {
-    advance(input: Buffer): IterableIterator<AdvanceYield>;
+    advance(input: Buffer): IterableIterator<AdvanceYield, AdvanceReturn>;
+    advance(input: Buffer, options: { collect: true }): AdvanceResult;
     inspect(query: Buffer): IterableIterator<Buffer>;
+    inspect(query: Buffer, options: { collect: true }): Buffer[];
     shutdown(): void;
     store(dir: string): RollupsMachine;
 }
@@ -164,148 +174,186 @@ abstract class RollupsMachineImpl implements RollupsMachine {
     abstract commitTransaction(machine: CartesiMachine): void;
     abstract rollbackTransaction(machine: CartesiMachine): void;
 
-    *advance(input: Buffer): IterableIterator<AdvanceYield> {
-        // start a machine "transaction"
-        const machine = this.startTransaction();
+    advance(input: Buffer, options?: { collect: true }): any {
+        const generator = function* (
+            this: RollupsMachineImpl,
+        ): IterableIterator<AdvanceYield, AdvanceReturn> {
+            // start a machine "transaction"
+            const machine = this.startTransaction();
 
-        // write input
-        machine.sendCmioResponse(CmioYieldReason.AdvanceState, input);
+            // write input
+            machine.sendCmioResponse(CmioYieldReason.AdvanceState, input);
 
-        while (true) {
-            // run machine until it yields or halts
-            const breakReason = machine.run();
+            while (true) {
+                // run machine until it yields or halts
+                const breakReason = machine.run();
 
-            switch (breakReason) {
-                case BreakReason.YieldedManually: {
-                    const { reason, data } = machine.receiveCmioRequest();
-                    switch (reason) {
-                        case CmioYieldReason.ManualRxAccepted: {
-                            // input was accepted
-                            // shutdown the backup fork if it exists
-                            this.commitTransaction(machine);
-                            return;
-                        }
-                        case CmioYieldReason.ManualRxRejected: {
-                            // input was rejected
-                            this.rollbackTransaction(machine);
-                            throw new RollupsInputRejectedError();
-                        }
-                        case CmioYieldReason.ManualTxException: {
-                            // exception
-                            this.rollbackTransaction(machine);
-
-                            const description = data.toString("utf-8"); // XXX: is this correct?
-                            throw new RollupsFatalError(description);
-                        }
-                        default: {
-                            this.rollbackTransaction(machine);
-                            throw new RollupsFatalError(
-                                `Unexpected yield reason: ${reason}`,
-                            );
-                        }
-                    }
-                }
-                case BreakReason.YieldedAutomatically: {
-                    const { reason, data } = machine.receiveCmioRequest();
-                    switch (reason) {
-                        case CmioYieldReason.AutomaticProgress: {
-                            try {
-                                const progress = data.readUInt32LE();
-                                yield {
-                                    type: "progress",
-                                    data: progress,
-                                };
-                            } catch {
-                                // just ignore the progress in case cannot read it
+                switch (breakReason) {
+                    case BreakReason.YieldedManually: {
+                        const { reason, data } = machine.receiveCmioRequest();
+                        switch (reason) {
+                            case CmioYieldReason.ManualRxAccepted: {
+                                // input was accepted
+                                // shutdown the backup fork if it exists
+                                this.commitTransaction(machine);
+                                return data;
                             }
-                            break;
-                        }
-                        case CmioYieldReason.AutomaticTxOutput: {
-                            yield { type: "output", data };
-                            break;
-                        }
-                        case CmioYieldReason.AutomaticTxReport: {
-                            yield { type: "report", data };
-                            break;
+                            case CmioYieldReason.ManualRxRejected: {
+                                // input was rejected
+                                this.rollbackTransaction(machine);
+                                throw new RollupsInputRejectedError();
+                            }
+                            case CmioYieldReason.ManualTxException: {
+                                // exception
+                                this.rollbackTransaction(machine);
+
+                                const description = data.toString("utf-8"); // XXX: is this correct?
+                                throw new RollupsFatalError(description);
+                            }
+                            default: {
+                                this.rollbackTransaction(machine);
+                                throw new RollupsFatalError(
+                                    `Unexpected yield reason: ${reason}`,
+                                );
+                            }
                         }
                     }
-                    continue; // run again
+                    case BreakReason.YieldedAutomatically: {
+                        const { reason, data } = machine.receiveCmioRequest();
+                        switch (reason) {
+                            case CmioYieldReason.AutomaticProgress: {
+                                try {
+                                    const progress = data.readUInt32LE();
+                                    yield {
+                                        type: "progress",
+                                        data: progress,
+                                    };
+                                } catch {
+                                    // just ignore the progress in case cannot read it
+                                }
+                                break;
+                            }
+                            case CmioYieldReason.AutomaticTxOutput: {
+                                yield { type: "output", data };
+                                break;
+                            }
+                            case CmioYieldReason.AutomaticTxReport: {
+                                yield { type: "report", data };
+                                break;
+                            }
+                        }
+                        continue; // run again
+                    }
+                    default: {
+                        this.rollbackTransaction(machine);
+                        throw new RollupsFatalError(
+                            `Unexpected break reason: ${breakReason}`,
+                        );
+                    }
                 }
-                default: {
-                    this.rollbackTransaction(machine);
-                    throw new RollupsFatalError(
-                        `Unexpected break reason: ${breakReason}`,
-                    );
+            }
+        }.bind(this);
+
+        if (options?.collect) {
+            const outputs: Buffer[] = [];
+            const reports: Buffer[] = [];
+            const rollups = generator();
+            while (true) {
+                const event = rollups.next();
+                if (event.done) {
+                    return { outputs, reports, outputsMerkleRoot: event.value };
+                }
+                switch (event.value.type) {
+                    case "output":
+                        outputs.push(event.value.data);
+                        break;
+                    case "report":
+                        reports.push(event.value.data);
+                        break;
+                    case "progress":
+                        break;
                 }
             }
         }
+
+        return generator();
     }
 
-    *inspect(query: Buffer): IterableIterator<Buffer> {
-        const machine = this.startTransaction();
+    inspect(query: Buffer, options?: { collect: true }): any {
+        const generator = function* (
+            this: RollupsMachineImpl,
+        ): IterableIterator<Buffer> {
+            const machine = this.startTransaction();
 
-        // write query
-        machine.sendCmioResponse(CmioYieldReason.InspectState, query);
+            // write query
+            machine.sendCmioResponse(CmioYieldReason.InspectState, query);
 
-        while (true) {
-            // run machine until it yields or halts
-            const breakReason = machine.run();
+            while (true) {
+                // run machine until it yields or halts
+                const breakReason = machine.run();
 
-            switch (breakReason) {
-                case BreakReason.YieldedManually: {
-                    const { reason, data } = machine.receiveCmioRequest();
-                    switch (reason) {
-                        case CmioYieldReason.ManualRxAccepted: {
-                            // input was accepted
-                            this.rollbackTransaction(machine);
-                            return;
-                        }
-                        case CmioYieldReason.ManualRxRejected: {
-                            // input was rejected
-                            this.rollbackTransaction(machine);
-                            throw new RollupsInputRejectedError();
-                        }
-                        case CmioYieldReason.ManualTxException: {
-                            // exception
-                            this.rollbackTransaction(machine);
-                            const description = data.toString("utf-8"); // XXX: is this correct?
-                            throw new RollupsFatalError(description);
-                        }
-                        default: {
-                            this.rollbackTransaction(machine);
-                            throw new RollupsFatalError(
-                                `Unexpected yield reason: ${reason}`,
-                            );
+                switch (breakReason) {
+                    case BreakReason.YieldedManually: {
+                        const { reason, data } = machine.receiveCmioRequest();
+                        switch (reason) {
+                            case CmioYieldReason.ManualRxAccepted: {
+                                // input was accepted
+                                this.rollbackTransaction(machine);
+                                return;
+                            }
+                            case CmioYieldReason.ManualRxRejected: {
+                                // input was rejected
+                                this.rollbackTransaction(machine);
+                                throw new RollupsInputRejectedError();
+                            }
+                            case CmioYieldReason.ManualTxException: {
+                                // exception
+                                this.rollbackTransaction(machine);
+                                const description = data.toString("utf-8"); // XXX: is this correct?
+                                throw new RollupsFatalError(description);
+                            }
+                            default: {
+                                this.rollbackTransaction(machine);
+                                throw new RollupsFatalError(
+                                    `Unexpected yield reason: ${reason}`,
+                                );
+                            }
                         }
                     }
-                }
-                case BreakReason.YieldedAutomatically: {
-                    const { reason, data } = machine.receiveCmioRequest();
-                    switch (reason) {
-                        case CmioYieldReason.AutomaticProgress: {
-                            // ignore progress
-                            break;
+                    case BreakReason.YieldedAutomatically: {
+                        const { reason, data } = machine.receiveCmioRequest();
+                        switch (reason) {
+                            case CmioYieldReason.AutomaticProgress: {
+                                // ignore progress
+                                break;
+                            }
+                            case CmioYieldReason.AutomaticTxOutput: {
+                                // ignore output
+                                break;
+                            }
+                            case CmioYieldReason.AutomaticTxReport: {
+                                // yield report
+                                yield data;
+                                break;
+                            }
                         }
-                        case CmioYieldReason.AutomaticTxOutput: {
-                            // ignore output
-                            break;
-                        }
-                        case CmioYieldReason.AutomaticTxReport: {
-                            // yield report
-                            yield data;
-                            break;
-                        }
+                        continue; // run again
                     }
-                    continue; // run again
-                }
-                default: {
-                    this.rollbackTransaction(machine);
-                    throw new RollupsFatalError(
-                        `Unexpected break reason: ${breakReason}`,
-                    );
+                    default: {
+                        this.rollbackTransaction(machine);
+                        throw new RollupsFatalError(
+                            `Unexpected break reason: ${breakReason}`,
+                        );
+                    }
                 }
             }
+        }.bind(this);
+
+        if (options?.collect) {
+            return [...generator()];
         }
+
+        return generator();
     }
 }
 
