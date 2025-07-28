@@ -10,7 +10,7 @@ importers:
     dependencies:
       koffi:
         specifier: ^2.12.2
-        version: 2.12.2
+        version: 2.12.3
     devDependencies:
       '@biomejs/biome':
         specifier: 2.1.2
@@ -3131,8 +3131,8 @@ packages:
   khroma@2.1.0:
     resolution: {integrity: sha512-Ls993zuzfayK269Svk9hzpeGUKob/sIgZzyHYdjQoAdQetRKpOLj+k/QQQ/6Qi0Yz65mlROrfd+Ev+1+7dz9Kw==}
 
-  koffi@2.12.2:
-    resolution: {integrity: sha512-OlHr5pjRfzauBYHxj/yPgw8AEaSzGxzOmkSKks38mc3j5OcK1TJ3VAGgt0qAw1j1Y0rLnXZRsoG79vTELNbj1A==}
+  koffi@2.12.3:
+    resolution: {integrity: sha512-VdUbreihzsJ6SAV9lm74/UkdvsPqOnkVAzdgtI7+kQlc0UZPtOdo28+dcquIhgSHQx3AO02gEz+3qtiEIhfM3w==}
 
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
@@ -8050,7 +8050,7 @@ snapshots:
 
   khroma@2.1.0: {}
 
-  koffi@2.12.2: {}
+  koffi@2.12.3: {}
 
   kolorist@1.8.0: {}
 
